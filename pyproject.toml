@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "pyqt6",
     "flask",
     "werkzeug",
     "waitress>=3.0.2",
