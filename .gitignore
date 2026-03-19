@@ -6,6 +6,6 @@ dist/
 wheels/
 *.egg-info
 uploads/
-
+thread_folders.json
 # Virtual environments
 .venv
