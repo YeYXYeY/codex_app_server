@@ -241,56 +241,11 @@
             min-height: 24px; max-height: 200px; resize: none; padding: 8px 4px; line-height: 1.5; font-family: inherit;
         }
 
-        /* 新的多文件预览容器与样式 */
-        #attachments-container {
-            display: none; /* 激活时用 flex */
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 0 4px 8px;
-            padding-top: 4px;
-        }
-        .attachment-pill {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 10px;
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            font-size: 13px;
-            color: var(--text-main);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-        .attachment-pill img {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            object-fit: cover;
-        }
-        .attachment-pill .filename {
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-        .attachment-pill .remove-file {
-            cursor: pointer;
-            color: var(--text-sub);
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            transition: 0.2s;
-            margin-left: 4px;
-        }
-        .attachment-pill .remove-file:hover {
-            background: #fce8e6;
-            color: #d93025;
-        }
+        #attachment-preview { display: none; margin: 0 4px 8px; padding: 6px 12px; background: #ffffff; border-radius: 16px; font-size: 13px; align-items: center; justify-content: space-between; border: 1px solid var(--border-color); color: var(--text-main); width: fit-content; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
+        #attachment-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; display: none; border: 1px solid var(--border-color);}
+        .attachment-info { display: flex; flex-direction: column; }
+        .remove-file { cursor: pointer; font-weight: bold; color: var(--text-sub); font-size: 18px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; transition: 0.2s;}
+        .remove-file:hover { background: #fce8e6; color: #d93025; }
 
         #input-toolbar { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding: 0 4px; }
         .toolbar-left { display: flex; align-items: center; gap: 8px; }
@@ -465,12 +420,18 @@
             <div id="input-card">
                 <textarea id="msg-input" placeholder="Ask Codex..." rows="1" disabled onkeydown="handleKeyPress(event)"></textarea>
                 
-                <div id="attachments-container"></div>
+                <div id="attachment-preview">
+                    <img id="attachment-thumb" src="" alt="Thumbnail">
+                    <div class="attachment-info">
+                        <span id="attached-filename" style="font-weight: 500;"></span>
+                    </div>
+                    <span class="remove-file" onclick="removeAttachment()" title="Remove Attachment">✕</span>
+                </div>
                 
                 <div id="input-toolbar">
                     <div class="toolbar-left">
                         <label for="file-input" class="plus-btn-label" title="Upload Attachment">+</label>
-                        <input type="file" id="file-input" onchange="handleFileUpload(event)" multiple>
+                        <input type="file" id="file-input" onchange="handleFileUpload(event)">
                     </div>
                     <div class="toolbar-right">
                         <div id="connection-status" class="connection-status" title="Disconnected"></div>
@@ -511,10 +472,7 @@
         let reqId = 1;
         let currentThreadId = null;
         let currentAgentContentDiv = null;
-        
-        // 【核心修改1】将单个文件改为数组，保存多文件队列
-        let attachedFiles = []; 
-        
+        let attachedFile = null; 
         let isGenerating = false;
         
         let cachedFolders = []; 
@@ -537,56 +495,11 @@
         const modelSelector = document.getElementById('model-selector');
         
         const fileInput = document.getElementById('file-input');
+        const attachmentPreview = document.getElementById('attachment-preview');
+        const attachedFilenameSpan = document.getElementById('attached-filename');
+        const attachmentThumb = document.getElementById('attachment-thumb');
         const connectionStatus = document.getElementById('connection-status');
         const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
-
-        // 【核心修改2】增加更新发送按钮状态和多文件UI的助手函数
-        function updateSendButtonState() {
-            const hasDoneFiles = attachedFiles.some(f => f.status === 'done');
-            if (msgInput.value.trim() || hasDoneFiles) {
-                sendBtn.disabled = false;
-                sendBtn.classList.add('active');
-            } else {
-                sendBtn.disabled = true;
-                sendBtn.classList.remove('active');
-            }
-        }
-
-        function renderAttachmentsUI() {
-            const container = document.getElementById('attachments-container');
-            container.innerHTML = '';
-            
-            if (attachedFiles.length === 0) {
-                container.style.display = 'none';
-                updateSendButtonState();
-                return;
-            }
-            container.style.display = 'flex';
-
-            attachedFiles.forEach(f => {
-                const pill = document.createElement('div');
-                pill.className = 'attachment-pill';
-
-                let iconHtml = '';
-                if (f.status === 'uploading') iconHtml = '⏳ ';
-                else if (f.status === 'parsing') iconHtml = '📄 ⏳ ';
-                else if (f.status === 'failed') iconHtml = '❌ ';
-                else if (f.thumbSrc) iconHtml = `<img src="${f.thumbSrc}" alt="thumb">`;
-                else iconHtml = '📄 ';
-
-                const nameDisplay = f.status === 'uploading' ? 'Uploading...' :
-                                    f.status === 'parsing' ? 'Parsing PDF...' :
-                                    f.status === 'failed' ? 'Failed' : f.filename;
-
-                pill.innerHTML = `
-                    ${iconHtml}
-                    <span class="filename" title="${f.filename}">${nameDisplay}</span>
-                    <span class="remove-file" onclick="removeAttachment('${f.id}')" title="Remove">✕</span>
-                `;
-                container.appendChild(pill);
-            });
-            updateSendButtonState();
-        }
 
         modelSelector.addEventListener('change', adjustModelSelectorWidth);
 
@@ -695,7 +608,13 @@
             let newHeight = this.scrollHeight;
             this.style.height = newHeight + 'px'; 
             
-            updateSendButtonState(); // 【核心修改3】替换原有的单文件检测逻辑
+            if (this.value.trim() || attachedFile) {
+                sendBtn.disabled = false;
+                sendBtn.classList.add('active');
+            } else {
+                sendBtn.disabled = true;
+                sendBtn.classList.remove('active');
+            }
 
             if (newHeight > 200) {
                 this.style.overflowY = 'auto';
@@ -749,6 +668,7 @@
                     }
                     pendingRequests.delete(msg.id);
                 } else if (msg.method === "account/rateLimits/updated") {
+                    // 监听服务器主动推送的额度更新 [cite: 5, 1129-1132]
                     if (msg.params && msg.params.rateLimits) {
                         updateRateLimitUI(msg.params.rateLimits);
                     }
@@ -807,9 +727,16 @@
                 if(onclose) {
                     onclose();
                 }
+
              }
         }
 
+
+
+
+
+
+        // 👇 核心新增：渲染额度 UI 的统一函数（支持双额度显示） [cite: 5, 1105-1111]
         function updateRateLimitUI(rateLimits) {
             if (!rateLimits) return;
             const now = new Date();
@@ -819,25 +746,32 @@
             let displayText = "";
             let needWarning = false;
 
+            // 解析 5小时额度 (Primary)
             if (rateLimits.primary) {
                 const primaryRemain = 100 - rateLimits.primary.usedPercent;
                 displayText += `5h剩余: ${primaryRemain}%`;
                 if (primaryRemain < 20) needWarning = true;                
             }
 
+            // 解析 每周额度 (Secondary)
             if (rateLimits.secondary) {
                 const secondaryRemain = 100 - rateLimits.secondary.usedPercent;
                 displayText += ` | 本周剩余: ${secondaryRemain}%`;
                 if (secondaryRemain <= 0) {
+                    // 获取下次更新时间
                     const resetDate = new Date(rateLimits.secondary.resetsAt * 1000);
                     const resetTimeStr = resetDate.toLocaleString();
+
+                    // 弹窗提示
                     showModal(`本周额度已用完！\n下次更新时间：${resetTimeStr}`)
                     needWarning = true;
+
                 } else if (secondaryRemain < 20) {
                     needWarning = true;
                 }
             }
 
+            //没有每周额度时，取5小时重置时间
             if (!rateLimits.secondary && rateLimits.primary && rateLimits.primary.usedPercent >= 100 ) {
                 const resetDate = new Date(rateLimits.primary.resetsAt * 1000);
                 const resetTimeStr = resetDate.toLocaleString();
@@ -847,6 +781,7 @@
 
             limitDiv.textContent = displayText || "获取额度中...";
 
+            // 如果任意一个额度跌破 20%，整体标红警示
             if (needWarning) {
                 limitDiv.style.color = '#d93025';
                 limitDiv.style.fontWeight = 'bold';
@@ -856,6 +791,7 @@
             }
         }
 
+        // 👇 核心新增：主动向服务器查询最新额度
         async function fetchRateLimits() {
             try {
                 const res = await rpcCall("account/rateLimits/read", {});
@@ -875,7 +811,7 @@
                     res.data.forEach(m => {
                         const opt = document.createElement('option');
                         opt.value = m.id; 
-                        opt.text = m.id; 
+                        opt.text = m.id; /* 移除长度截断，完全显示模型名称 */
                         modelSelector.add(opt);
                     });
                     modelSelector.disabled = false;
@@ -930,6 +866,10 @@
         }
 
         async function loadThreadList() {
+
+
+
+
             try {
                 const fRes = await fetch('/api/folders');
                 const fData = await fRes.json();
@@ -1181,7 +1121,7 @@
                         });
                     } catch(e) { console.error("Rename failed", e); }
                 }
-                await loadThreadList(); 
+                await loadThreadList(); // 强制等待列表最新状态刷新
             };
             
             input.onkeydown = (e) => {
@@ -1276,18 +1216,20 @@
                 const newName = input.value.trim();
                 if(newName && newName !== currentName) {
                     try {
+                        // 1. 本地存储覆盖名称（绝对生效的终极方案）
                         await fetch('/api/threads/rename', { 
                             method: 'POST', headers: {'Content-Type': 'application/json'}, 
                             body: JSON.stringify({ thread_id: activeContextTargetId, new_name: newName }) 
                         });
+                        // 2. 依然尝试同步给后端
                         await rpcCall("thread/update", { threadId: activeContextTargetId, id: activeContextTargetId, name: newName, title: newName });
                     } catch(e) { console.error("Rename failed", e); }
                 }
-                await loadThreadList(); 
+                await loadThreadList(); // 强制等待列表最新状态刷新
             };
 
             input.onkeydown = (e) => {
-                if (e.isComposing) return; 
+                if (e.isComposing) return; // 防止中文输入法按回车产生冲突
                 if(e.key === 'Enter') {
                     e.preventDefault();
                     commitRename();
@@ -1400,7 +1342,9 @@
             fileInput.disabled = !enabled;
             
             if (enabled) { 
-                updateSendButtonState(); // 【核心修改4】替换为新的检测函数
+                if(msgInput.value.trim() || attachedFile) {
+                    sendBtn.disabled = false; sendBtn.classList.add('active');
+                }
                 msgInput.focus(); 
                 sendBtn.style.display = 'flex'; 
                 stopBtn.style.display = 'none'; 
@@ -1432,6 +1376,7 @@
                     const avatar = currentAgentContentDiv.closest('.message').querySelector('.avatar');
                     if (avatar) avatar.classList.remove('loading');
                     
+                    // 如果打断时气泡仍为空，直接移除DOM，避免留白
                     if (currentAgentContentDiv._rawText === '') {
                         currentAgentContentDiv.closest('.message').remove();
                     } else {
@@ -1478,36 +1423,44 @@
         }
 
         function handleServerNotification(msg) {
+            // [新增] 拦截独立片段结束事件，关闭当前气泡的加载动画，为下个片段做准备
             if (msg.method === "item/completed" || msg.method === "item/message/completed") {
                 if (currentAgentContentDiv) {
+                    // [修复] 只有气泡内已经接收到了实质性文本，才将其封口。防止预创建的空白Loading气泡被后台事件误伤关闭
                     if (currentAgentContentDiv._rawText !== '') {
                         const avatar = currentAgentContentDiv.closest('.message').querySelector('.avatar');
                         if (avatar) avatar.classList.remove('loading');
                         
+                        // 去除光标，完成最后一次渲染
                         currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
                         injectCopyButtons(currentAgentContentDiv);
                         
-                        currentAgentContentDiv = null; 
+                        currentAgentContentDiv = null; // 清空引用，强制下一个 delta 触发新气泡
                     }
                 }
+                // [增强提示] 如果仍在生成中，显示 Working 状态，以提示“等待第二条回复/工具调用中”
                 if (isGenerating && thinkingStatus) {
                     thinkingStatus.innerHTML = '<div class="dot-pulse"></div> Working...';
                     thinkingStatus.style.display = 'flex';
                 }
             }
 
+            // 放宽限制：即使 isGenerating 意外改变，只要收到 delta 流就不丢弃数据
             if (msg.method === "item/agentMessage/delta") {
+                // 只有当 delta 真的有文字内容时才处理
                 const content = msg.params.delta || msg.params.text || "";
                 if (!content && !currentAgentContentDiv) return; 
 
                 if (thinkingStatus) thinkingStatus.style.display = 'none';
 
                 if (!currentAgentContentDiv) {
+                    // 创建新气泡，并带上 loading 状态
                     appendMessage('agent', '', null, null, null, true);
                 }
 
                 if (currentAgentContentDiv) {
                     currentAgentContentDiv._rawText += content;
+                    // 使用 requestAnimationFrame 节流渲染
                     if (!renderFrameId) {
                         renderFrameId = requestAnimationFrame(() => {
                             renderAgentContent();
@@ -1518,6 +1471,7 @@
             } else if (msg.method === "turn/completed") {
                 if (currentAgentContentDiv) {
                     if (currentAgentContentDiv._rawText.trim() === "") {
+                        // 如果气泡是空的，移除整个 message 包装层
                         currentAgentContentDiv.closest('.message').remove();
                     } else {
                         currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
@@ -1532,6 +1486,7 @@
                     const avatar = currentAgentContentDiv.closest('.message').querySelector('.avatar');
                     if (avatar) avatar.classList.remove('loading');
                     
+                    // [清理] 出错时同理
                     if (currentAgentContentDiv._rawText === '') {
                         currentAgentContentDiv.closest('.message').remove();
                     } else {
@@ -1633,160 +1588,7 @@
             document.body.removeChild(textArea);
         }
 
-        // 【核心修改5】完全重写的多文件上传逻辑
-        async function handleFileUpload(event) {
-            const files = Array.from(event.target.files);
-            if (files.length === 0) return;
-
-            const MAX_SIZE = 50 * 1024 * 1024;
-
-            for (const file of files) {
-                if (file.size > MAX_SIZE) {
-                    alert(`File ${file.name} is too large (Max 50MB).`);
-                    continue;
-                }
-
-                // 生成唯一ID，加入队列并立刻渲染“上传中”UI
-                const fileId = Date.now() + Math.random().toString(36).substr(2, 9);
-                attachedFiles.push({ id: fileId, file: file, status: 'uploading', filename: file.name });
-                renderAttachmentsUI();
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                try {
-                    const response = await fetch('/upload', { method: 'POST', body: formData });
-                    const result = await response.json();
-                    
-                    const fileIndex = attachedFiles.findIndex(f => f.id === fileId);
-                    if (fileIndex > -1) {
-                        if (response.ok) {
-                            let thumbSrc = null;
-                            if (file.type.startsWith('image/')) {
-                                thumbSrc = URL.createObjectURL(file);
-                            }
-
-                            // 独立处理 PDF 解析
-                            let extractedText = null;
-                            if (file.type === 'application/pdf') {
-                                attachedFiles[fileIndex].status = 'parsing';
-                                renderAttachmentsUI();
-                                try {
-                                    const arrayBuffer = await file.arrayBuffer();
-                                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                                    extractedText = "";
-                                    const maxPages = Math.min(pdf.numPages, 30);
-                                    for (let i = 1; i <= maxPages; i++) {
-                                        const page = await pdf.getPage(i);
-                                        const textContent = await page.getTextContent();
-                                        extractedText += `[Page ${i}]\n` + textContent.items.map(item => item.str).join(' ') + `\n\n`;
-                                    }
-                                    if (pdf.numPages > maxPages) extractedText += `\n[...PDF Truncated after ${maxPages} pages...]`;
-                                } catch (e) {
-                                    console.error("PDF Parse error", e);
-                                }
-                            }
-
-                            // 更新为成功状态
-                            attachedFiles[fileIndex] = {
-                                ...attachedFiles[fileIndex],
-                                ...result,
-                                status: 'done',
-                                thumbSrc: thumbSrc,
-                                extractedText: extractedText
-                            };
-                        } else {
-                            attachedFiles[fileIndex].status = 'failed';
-                        }
-                    }
-                } catch (error) {
-                    const fileIndex = attachedFiles.findIndex(f => f.id === fileId);
-                    if (fileIndex > -1) attachedFiles[fileIndex].status = 'failed';
-                }
-                renderAttachmentsUI(); // 每完成一个文件刷新一次UI
-            }
-            fileInput.value = ''; // 清空 input 以便下次能选中同名文件
-        }
-
-        // 【核心修改6】重写移除附件逻辑
-        function removeAttachment(id) {
-            attachedFiles = attachedFiles.filter(f => f.id !== id);
-            renderAttachmentsUI();
-        }
-
-        // 【核心修改7】重写发送消息逻辑以支持多文件数组
-        function sendMessage() {
-            let text = msgInput.value.trim();
-            const readyFiles = attachedFiles.filter(f => f.status === 'done');
-
-            if (!text && readyFiles.length === 0) return; 
-            if (!currentThreadId) return;
-
-            currentTurnCounter++;
-            
-            let previewText = text;
-            if (readyFiles.length > 0) {
-                if (!text) previewText = readyFiles.length === 1 ? readyFiles[0].filename : `[${readyFiles.length} Attachments]`;
-                else previewText += ` + 📎x${readyFiles.length}`;
-            }
-            previewText = previewText.substring(0, 15) + (previewText.length > 15 ? '...' : '');
-            addTimelineDot(currentTurnCounter, previewText);
-
-            let inputItems = []; 
-            if (text) {
-                inputItems.push({ type: "text", text: text });
-            }
-            
-            // 循环处理所有就绪的多附件
-            for (const f of readyFiles) {
-                if (f.isImage) {
-                    inputItems.push({ type: "localImage", path: f.filepath });
-                } else {
-                    let contentPrompt = "";
-                    if (f.extractedText) {
-                        contentPrompt = `\n\n[System: User uploaded a PDF (${f.filename}). Content extracted below:]\n${f.extractedText}\n[End of PDF Content]`;
-                    } else {
-                        contentPrompt = `\n\n[System Hint: User sent a file (${f.filename}) at ${f.filepath}. Please read it and answer.]`;
-                    }
-
-                    let textItem = inputItems.find(i => i.type === 'text');
-                    if (textItem) {
-                        textItem.text += contentPrompt; 
-                    } else {
-                        inputItems.push({ type: "text", text: contentPrompt });
-                    }
-                }
-            }
-            
-            const safetyPrompt = "\n\n[System Safety Protocol: You are running in a restricted environment. File operations are strictly limited to the current directory only. Do not execute system commands or access paths outside the working directory.]";
-            let textItem = inputItems.find(i => i.type === 'text');
-            if (textItem) { textItem.text += safetyPrompt; }
-            else if (inputItems.length > 0) { inputItems.push({ type: "text", text: safetyPrompt }); }
-            else { inputItems.push({ type: "text", text: " " + safetyPrompt }); }
-
-            appendMessage('user', text, currentTurnCounter, readyFiles, inputItems);
-
-            msgInput.value = ''; 
-            resetInputHeight(); 
-            
-            // 发送完毕后清空附件
-            attachedFiles = [];
-            renderAttachmentsUI();
-            
-            setGeneratingState(); 
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            ws.send(JSON.stringify({ 
-                method: "turn/start", 
-                id: reqId++, 
-                params: { threadId: currentThreadId, input: inputItems } 
-            }));
-            
-            setTimeout(() => { loadThreadList(); }, 500);
-        }
-
-        // 【核心修改8】气泡渲染支持多个文件元素
-        function appendMessage(role, text, turnId = null, files = null, inputItems = null, isLoading = false) {
+        function appendMessage(role, text, turnId = null, file = null, inputItems = null, isLoading = false) {
             const wrapper = document.createElement('div'); 
             wrapper.className = `message message-${role}`;
             
@@ -1802,34 +1604,15 @@
                 const bubble = document.createElement('div');
                 bubble.className = 'user-bubble';
 
-                // ==== 渲染多图片与多文件附件区域 ====
-                if (files && files.length > 0) {
-                    const filesContainer = document.createElement('div');
-                    filesContainer.style.display = 'flex';
-                    filesContainer.style.flexWrap = 'wrap';
-                    filesContainer.style.gap = '8px';
-                    filesContainer.style.marginBottom = text ? '8px' : '0';
-
-                    files.forEach(f => {
-                        if (f.isImage && f.thumbSrc) {
-                            const img = document.createElement('img');
-                            img.src = f.thumbSrc;
-                            img.style.maxWidth = '150px';
-                            img.style.maxHeight = '150px';
-                            img.style.borderRadius = '12px';
-                            img.style.border = '1px solid #e0e0e0';
-                            filesContainer.appendChild(img);
-                        } else {
-                            const fileDiv = document.createElement('div');
-                            fileDiv.textContent = `📎 ${f.filename}`;
-                            fileDiv.style.fontSize = '13px';
-                            fileDiv.style.padding = '6px 12px';
-                            fileDiv.style.background = 'rgba(0,0,0,0.05)';
-                            fileDiv.style.borderRadius = '12px';
-                            filesContainer.appendChild(fileDiv);
-                        }
-                    });
-                    bubble.appendChild(filesContainer);
+                if (file && file.isImage && file.thumbSrc) {
+                    const img = document.createElement('img');
+                    img.src = file.thumbSrc;
+                    img.style.maxWidth = '200px';
+                    img.style.maxHeight = '200px';
+                    img.style.borderRadius = '12px';
+                    img.style.display = 'block';
+                    img.style.marginBottom = text ? '8px' : '0';
+                    bubble.appendChild(img);
                 }
                 
                 if (text) {
@@ -1838,6 +1621,15 @@
                     while (tempDiv.firstChild) {
                         bubble.appendChild(tempDiv.firstChild);
                     }
+                }
+
+                if (file && !file.isImage) {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.textContent = `[Attachment: ${file.filename}]`;
+                    fileDiv.style.marginTop = text ? '8px' : '0';
+                    fileDiv.style.fontSize = '14px';
+                    fileDiv.style.opacity = '0.8';
+                    bubble.appendChild(fileDiv);
                 }
                 
                 if (inputItems) {
@@ -1908,19 +1700,171 @@
             return contentContainer;
         }
 
+        function appendSysMsg(text) {
+            const div = document.createElement('div'); 
+            div.className = 'message sys-msg'; 
+            div.textContent = text;
+            chatBox.appendChild(div); 
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function updateSidebarActive(id) { 
+            document.querySelectorAll('.thread-wrapper').forEach(el => { 
+                el.classList.toggle('active', el.dataset.id === id); 
+            }); 
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0]; 
+            if (!file) return;
+            
+            const MAX_SIZE = 50 * 1024 * 1024;
+            if (file.size > MAX_SIZE) {
+                alert("File is too large (Max 50MB).");
+                event.target.value = ''; 
+                return;
+            }
+
+            attachedFilenameSpan.textContent = `Uploading...`; 
+            attachmentPreview.style.display = 'flex';
+            
+            let thumbSrc = null;
+            if (file.type.startsWith('image/')) {
+                thumbSrc = URL.createObjectURL(file);
+                attachmentThumb.src = thumbSrc;
+                attachmentThumb.style.display = 'block';
+            } else {
+                attachmentThumb.style.display = 'none';
+            }
+            
+            const formData = new FormData(); 
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload', { method: 'POST', body: formData }); 
+                const result = await response.json();
+                if (response.ok) { 
+                    attachedFile = result; 
+                    if (thumbSrc) attachedFile.thumbSrc = thumbSrc;
+                    
+                    if (file.type === 'application/pdf') {
+                        attachedFilenameSpan.textContent = `Parsing PDF...`;
+                        try {
+                            const arrayBuffer = await file.arrayBuffer();
+                            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                            let extractedText = "";
+                            const maxPages = Math.min(pdf.numPages, 30); 
+                            for (let i = 1; i <= maxPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const textContent = await page.getTextContent();
+                                const pageText = textContent.items.map(item => item.str).join(' ');
+                                extractedText += `[Page ${i}]\n${pageText}\n\n`;
+                            }
+                            if (pdf.numPages > maxPages) extractedText += `\n[...PDF Truncated after ${maxPages} pages...]`;
+                            attachedFile.extractedText = extractedText;
+                            attachedFilenameSpan.textContent = `${result.filename} (Parsed)`;
+                        } catch (e) { console.error(e); attachedFilenameSpan.textContent = `${result.filename}`; }
+                    } else {
+                        attachedFilenameSpan.textContent = `${result.filename}`; 
+                    }
+
+                    sendBtn.disabled = false; sendBtn.classList.add('active');
+                } else { 
+                    attachedFilenameSpan.textContent = `Upload Failed`; 
+                    attachedFile = null; attachmentThumb.style.display = 'none';
+                }
+            } catch (error) { attachedFile = null; attachmentThumb.style.display = 'none'; }
+            fileInput.value = ''; 
+        }
+
+        function removeAttachment() { 
+            attachedFile = null; 
+            attachmentPreview.style.display = 'none'; 
+            attachmentThumb.src = '';
+            if(!msgInput.value.trim()) {
+                sendBtn.disabled = true; sendBtn.classList.remove('active');
+            }
+        }
+
+        function sendMessage() {
+            let text = msgInput.value.trim(); 
+            if (!text && !attachedFile) return; 
+            if (!currentThreadId) return;
+
+            currentTurnCounter++;
+            
+            let previewText = text;
+            if (attachedFile) {
+                if (!text) previewText = attachedFile.isImage ? "[Image]" : attachedFile.filename;
+                else previewText += " + 📎";
+            }
+            previewText = previewText.substring(0, 15) + (previewText.length > 15 ? '...' : '');
+            addTimelineDot(currentTurnCounter, previewText);
+
+            let inputItems = []; 
+            if (text) {
+                inputItems.push({ type: "text", text: text });
+            }
+            
+            if (attachedFile) {
+                if (attachedFile.isImage) {
+                    inputItems.push({ type: "localImage", path: attachedFile.filepath });
+                } else {
+                    let contentPrompt = "";
+                    if (attachedFile.extractedText) {
+                        contentPrompt = `\n\n[System: User uploaded a PDF. Content extracted below:]\n${attachedFile.extractedText}\n[End of PDF Content]`;
+                    } else {
+                        contentPrompt = `\n\n[System Hint: User sent a file at ${attachedFile.filepath}. Please read it and answer.]`;
+                    }
+
+                    let textItem = inputItems.find(i => i.type === 'text');
+                    if (textItem) {
+                        textItem.text += contentPrompt; 
+                    } else {
+                        inputItems.push({ type: "text", text: contentPrompt });
+                    }
+                }
+            }
+            
+            const safetyPrompt = "\n\n[System Safety Protocol: You are running in a restricted environment. File operations are strictly limited to the current directory only. Do not execute system commands or access paths outside the working directory.]";
+            let textItem = inputItems.find(i => i.type === 'text');
+            if (textItem) { textItem.text += safetyPrompt; }
+            else if (inputItems.length > 0) { inputItems.push({ type: "text", text: safetyPrompt }); }
+            else { inputItems.push({ type: "text", text: " " + safetyPrompt }); }
+
+            appendMessage('user', text, currentTurnCounter, attachedFile, inputItems);
+
+            msgInput.value = ''; 
+            resetInputHeight(); 
+            removeAttachment(); 
+            setGeneratingState(); 
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            ws.send(JSON.stringify({ 
+                method: "turn/start", 
+                id: reqId++, 
+                params: { threadId: currentThreadId, input: inputItems } 
+            }));
+            
+            setTimeout(() => { loadThreadList(); }, 500);
+        }
+
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
+                    // 单独按下 Enter 发送
                     event.preventDefault();
                     sendMessage();
                 } else if (event.ctrlKey || event.metaKey) {
+                    // 按下 Ctrl+Enter 或 Cmd+Enter 手动插入换行
                     event.preventDefault();
                     const start = msgInput.selectionStart;
                     const end = msgInput.selectionEnd;
                     msgInput.value = msgInput.value.substring(0, start) + '\n' + msgInput.value.substring(end);
                     msgInput.selectionStart = msgInput.selectionEnd = start + 1;
-                    msgInput.dispatchEvent(new Event('input')); 
+                    msgInput.dispatchEvent(new Event('input')); // 触发自动调整高度
                 }
+                // Shift+Enter 走默认行为，自动原生换行
             }
         }
         
