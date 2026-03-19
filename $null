@@ -1,0 +1,24 @@
+codex app-server (WebSockets)
+  listening on: ws://0.0.0.0:4500
+  readyz: http://0.0.0.0:4500/readyz
+  healthz: http://0.0.0.0:4500/healthz
+  note: this is a raw WS server; consider running behind TLS/auth for real remote use
+[2m2026-03-17T14:05:14.012280Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:05:28.023668Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:06:07.005512Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:06:07.030908Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:06:11.222032Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Client error: error sending request for url (http://127.0.0.1:23120/mcp), when send initialized notification
+[2m2026-03-17T14:07:07.371584Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:07:07.399285Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:08:10.636342Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:08:10.685941Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:08:33.880746Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:32:38.989218Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:36:01.361952Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:38:18.332892Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:38:21.490223Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Client error: error sending request for url (http://127.0.0.1:23120/mcp), when send initialized notification
+[2m2026-03-17T14:44:25.582462Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:44:28.648673Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:44:31.366027Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)
+[2m2026-03-17T14:51:06.248095Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:8000/mcp)
+[2m2026-03-17T14:51:06.269362Z[0m [31mERROR[0m [2mrmcp::transport::streamable_http_client[0m[2m:[0m fail to get common stream: Client error: error sending request for url (http://127.0.0.1:23120/mcp)

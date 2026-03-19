@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Login</title>
+    <link rel="icon" href="/static/chat-gpt.png" type="image/png">
+    
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; height: 100vh; background-color: #343541; color: #ececf1; align-items: center; justify-content: center; }
+        .login-box { background-color: #202123; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 360px; text-align: center; border: 1px solid #565869; }
+        h2 { margin-top: 0; margin-bottom: 30px; font-weight: 500; }
+        input[type="password"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #565869; border-radius: 6px; background-color: #40414f; color: white; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input[type="password"]:focus { border-color: #10a37f; }
+        button { width: 100%; padding: 12px; background-color: #10a37f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #1a7f66; }
+        .error-msg { color: #ff6b6b; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
+
+        @media (max-width: 480px) {
+            .login-box { padding: 24px; width: 85%; }
+            h2 { margin-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Codex Client</h2>
+        <div class="error-msg">{{ error if error else '' }}</div>
+        
+        <form method="POST" action="/login">
+            <input type="password" id="password" name="password" placeholder="Please enter access password" required autofocus>
+            <button type="submit">Enter System</button>
+        </form>
+    </div>
+</body>
+</html>
