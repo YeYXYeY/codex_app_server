@@ -299,6 +299,16 @@
         .dot-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
+        /* === Typing Indicator & Cursor === */
+        .typing-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 4px 2px; height: 20px; }
+        .typing-dot { width: 6px; height: 6px; background-color: var(--text-sub); border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        .blinking-cursor { display: inline-block; width: 8px; height: 1.2em; background-color: var(--text-main); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin-left: 4px; opacity: 0.8; border-radius: 2px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
         .footer-disclaimer { 
             width: 100%;
             text-align: center; 
@@ -1353,6 +1363,7 @@
             fileInput.disabled = true; 
             sendBtn.style.display = 'none'; 
             stopBtn.style.display = 'flex'; 
+            thinkingStatus.innerHTML = '<div class="dot-pulse"></div> Thinking...';
             thinkingStatus.style.display = 'flex'; 
         }
         
@@ -1368,7 +1379,11 @@
                     // 如果打断时气泡仍为空，直接移除DOM，避免留白
                     if (currentAgentContentDiv._rawText === '') {
                         currentAgentContentDiv.closest('.message').remove();
+                    } else {
+                        currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+                        injectCopyButtons(currentAgentContentDiv);
                     }
+                    currentAgentContentDiv = null;
                 }
                 appendSysMsg("Aborted."); 
                 toggleUIState(true);
@@ -1415,8 +1430,18 @@
                     if (currentAgentContentDiv._rawText !== '') {
                         const avatar = currentAgentContentDiv.closest('.message').querySelector('.avatar');
                         if (avatar) avatar.classList.remove('loading');
+                        
+                        // 去除光标，完成最后一次渲染
+                        currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+                        injectCopyButtons(currentAgentContentDiv);
+                        
                         currentAgentContentDiv = null; // 清空引用，强制下一个 delta 触发新气泡
                     }
+                }
+                // [增强提示] 如果仍在生成中，显示 Working 状态，以提示“等待第二条回复/工具调用中”
+                if (isGenerating && thinkingStatus) {
+                    thinkingStatus.innerHTML = '<div class="dot-pulse"></div> Working...';
+                    thinkingStatus.style.display = 'flex';
                 }
             }
 
@@ -1444,9 +1469,14 @@
                     }
                 }
             } else if (msg.method === "turn/completed") {
-                if (currentAgentContentDiv && currentAgentContentDiv._rawText.trim() === "") {
-                    // 如果气泡是空的，移除整个 message 包装层
-                    currentAgentContentDiv.closest('.message').remove();
+                if (currentAgentContentDiv) {
+                    if (currentAgentContentDiv._rawText.trim() === "") {
+                        // 如果气泡是空的，移除整个 message 包装层
+                        currentAgentContentDiv.closest('.message').remove();
+                    } else {
+                        currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+                        injectCopyButtons(currentAgentContentDiv);
+                    }
                 }
                 currentAgentContentDiv = null;
                 toggleUIState(true);
@@ -1459,7 +1489,11 @@
                     // [清理] 出错时同理
                     if (currentAgentContentDiv._rawText === '') {
                         currentAgentContentDiv.closest('.message').remove();
+                    } else {
+                        currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+                        injectCopyButtons(currentAgentContentDiv);
                     }
+                    currentAgentContentDiv = null;
                 }
                 appendSysMsg(`[Error]: ${(msg.params.error || {}).message || "Unknown error"}`); 
                 toggleUIState(true);
@@ -1468,7 +1502,22 @@
 
         function renderAgentContent() {
             if (!currentAgentContentDiv) return;
-            currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+            if (currentAgentContentDiv._rawText === '') {
+                currentAgentContentDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            } else {
+                currentAgentContentDiv.innerHTML = marked.parse(currentAgentContentDiv._rawText);
+                
+                const cursor = document.createElement('span');
+                cursor.className = 'blinking-cursor';
+                cursor.innerHTML = '▋';
+                
+                const lastP = currentAgentContentDiv.lastElementChild;
+                if (lastP && lastP.tagName === 'P') {
+                    lastP.appendChild(cursor);
+                } else {
+                    currentAgentContentDiv.appendChild(cursor);
+                }
+            }
             injectCopyButtons(currentAgentContentDiv);
             const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 100;
             if(isAtBottom) { chatBox.scrollTop = chatBox.scrollHeight; }
@@ -1597,13 +1646,14 @@
 
                 const textDiv = document.createElement('div');
                 textDiv.className = 'agent-bubble';
-                textDiv.innerHTML = marked.parse(text); 
-                textDiv._rawText = text; 
-                currentAgentContentDiv = textDiv; 
-                textDiv._rawText = text;
-                if (text === '') { 
-                    currentAgentContentDiv = textDiv; 
+                textDiv._rawText = text || ''; 
+                
+                if (isLoading && !text) {
+                    textDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+                } else {
+                    textDiv.innerHTML = marked.parse(text); 
                 }
+                currentAgentContentDiv = textDiv;
                 contentContainer.appendChild(textDiv);
                 contentWrapper.appendChild(contentContainer);
 
