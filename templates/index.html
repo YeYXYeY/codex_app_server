@@ -241,11 +241,19 @@
             min-height: 24px; max-height: 200px; resize: none; padding: 8px 4px; line-height: 1.5; font-family: inherit;
         }
 
-        #attachment-preview { display: none; margin: 0 4px 8px; padding: 6px 12px; background: #ffffff; border-radius: 16px; font-size: 13px; align-items: center; justify-content: space-between; border: 1px solid var(--border-color); color: var(--text-main); width: fit-content; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
-        #attachment-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; display: none; border: 1px solid var(--border-color);}
-        .attachment-info { display: flex; flex-direction: column; }
+        #attachment-preview { display: none; margin: 0 4px 8px; }
+        #attachment-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .attachment-chip { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); max-width: 280px; }
+        .attachment-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0; }
+        .attachment-file-icon { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background: #f8f9fa; color: var(--text-sub); font-size: 18px; flex-shrink: 0; }
+        .attachment-info { min-width: 0; display: flex; flex-direction: column; }
+        .attachment-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .attachment-status { font-size: 12px; color: var(--text-sub); }
         .remove-file { cursor: pointer; font-weight: bold; color: var(--text-sub); font-size: 18px; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; transition: 0.2s;}
         .remove-file:hover { background: #fce8e6; color: #d93025; }
+        .user-attachments { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .user-attachment-image { max-width: 200px; max-height: 200px; border-radius: 12px; display: block; }
+        .user-attachment-file { font-size: 14px; opacity: 0.85; padding: 8px 12px; background: rgba(0,0,0,0.04); border-radius: 10px; }
 
         #input-toolbar { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding: 0 4px; }
         .toolbar-left { display: flex; align-items: center; gap: 8px; }
@@ -421,17 +429,13 @@
                 <textarea id="msg-input" placeholder="Ask Codex..." rows="1" disabled onkeydown="handleKeyPress(event)"></textarea>
                 
                 <div id="attachment-preview">
-                    <img id="attachment-thumb" src="" alt="Thumbnail">
-                    <div class="attachment-info">
-                        <span id="attached-filename" style="font-weight: 500;"></span>
-                    </div>
-                    <span class="remove-file" onclick="removeAttachment()" title="Remove Attachment">✕</span>
+                    <div id="attachment-list"></div>
                 </div>
                 
                 <div id="input-toolbar">
                     <div class="toolbar-left">
                         <label for="file-input" class="plus-btn-label" title="Upload Attachment">+</label>
-                        <input type="file" id="file-input" onchange="handleFileUpload(event)">
+                        <input type="file" id="file-input" multiple onchange="handleFileUpload(event)">
                     </div>
                     <div class="toolbar-right">
                         <div id="connection-status" class="connection-status" title="Disconnected"></div>
@@ -472,7 +476,7 @@
         let reqId = 1;
         let currentThreadId = null;
         let currentAgentContentDiv = null;
-        let attachedFile = null; 
+        let attachedFiles = []; 
         let isGenerating = false;
         
         let cachedFolders = []; 
@@ -496,8 +500,7 @@
         
         const fileInput = document.getElementById('file-input');
         const attachmentPreview = document.getElementById('attachment-preview');
-        const attachedFilenameSpan = document.getElementById('attached-filename');
-        const attachmentThumb = document.getElementById('attachment-thumb');
+        const attachmentList = document.getElementById('attachment-list');
         const connectionStatus = document.getElementById('connection-status');
         const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
 
@@ -608,13 +611,7 @@
             let newHeight = this.scrollHeight;
             this.style.height = newHeight + 'px'; 
             
-            if (this.value.trim() || attachedFile) {
-                sendBtn.disabled = false;
-                sendBtn.classList.add('active');
-            } else {
-                sendBtn.disabled = true;
-                sendBtn.classList.remove('active');
-            }
+            updateSendButtonState();
 
             if (newHeight > 200) {
                 this.style.overflowY = 'auto';
@@ -1342,9 +1339,7 @@
             fileInput.disabled = !enabled;
             
             if (enabled) { 
-                if(msgInput.value.trim() || attachedFile) {
-                    sendBtn.disabled = false; sendBtn.classList.add('active');
-                }
+                updateSendButtonState();
                 msgInput.focus(); 
                 sendBtn.style.display = 'flex'; 
                 stopBtn.style.display = 'none'; 
@@ -1588,7 +1583,7 @@
             document.body.removeChild(textArea);
         }
 
-        function appendMessage(role, text, turnId = null, file = null, inputItems = null, isLoading = false) {
+        function appendMessage(role, text, turnId = null, files = null, inputItems = null, isLoading = false) {
             const wrapper = document.createElement('div'); 
             wrapper.className = `message message-${role}`;
             
@@ -1604,15 +1599,25 @@
                 const bubble = document.createElement('div');
                 bubble.className = 'user-bubble';
 
-                if (file && file.isImage && file.thumbSrc) {
-                    const img = document.createElement('img');
-                    img.src = file.thumbSrc;
-                    img.style.maxWidth = '200px';
-                    img.style.maxHeight = '200px';
-                    img.style.borderRadius = '12px';
-                    img.style.display = 'block';
-                    img.style.marginBottom = text ? '8px' : '0';
-                    bubble.appendChild(img);
+                if (files && files.length) {
+                    const attachmentsWrap = document.createElement('div');
+                    attachmentsWrap.className = 'user-attachments';
+
+                    files.forEach(file => {
+                        if (file.isImage && file.thumbSrc) {
+                            const img = document.createElement('img');
+                            img.src = file.thumbSrc;
+                            img.className = 'user-attachment-image';
+                            attachmentsWrap.appendChild(img);
+                        } else {
+                            const fileDiv = document.createElement('div');
+                            fileDiv.className = 'user-attachment-file';
+                            fileDiv.textContent = `[Attachment: ${file.filename}]`;
+                            attachmentsWrap.appendChild(fileDiv);
+                        }
+                    });
+
+                    bubble.appendChild(attachmentsWrap);
                 }
                 
                 if (text) {
@@ -1623,15 +1628,6 @@
                     }
                 }
 
-                if (file && !file.isImage) {
-                    const fileDiv = document.createElement('div');
-                    fileDiv.textContent = `[Attachment: ${file.filename}]`;
-                    fileDiv.style.marginTop = text ? '8px' : '0';
-                    fileDiv.style.fontSize = '14px';
-                    fileDiv.style.opacity = '0.8';
-                    bubble.appendChild(fileDiv);
-                }
-                
                 if (inputItems) {
                     wrapper.dataset.inputItems = JSON.stringify(inputItems);
                 }
@@ -1714,89 +1710,199 @@
             }); 
         }
 
-        async function handleFileUpload(event) {
-            const file = event.target.files[0]; 
-            if (!file) return;
-            
-            const MAX_SIZE = 50 * 1024 * 1024;
-            if (file.size > MAX_SIZE) {
-                alert("File is too large (Max 50MB).");
-                event.target.value = ''; 
+        function updateSendButtonState() {
+            if (msgInput.value.trim() || attachedFiles.length) {
+                sendBtn.disabled = false;
+                sendBtn.classList.add('active');
+            } else {
+                sendBtn.disabled = true;
+                sendBtn.classList.remove('active');
+            }
+        }
+
+        function renderAttachmentPreview() {
+            attachmentList.innerHTML = '';
+
+            if (!attachedFiles.length) {
+                attachmentPreview.style.display = 'none';
+                updateSendButtonState();
                 return;
             }
 
-            attachedFilenameSpan.textContent = `Uploading...`; 
-            attachmentPreview.style.display = 'flex';
-            
-            let thumbSrc = null;
-            if (file.type.startsWith('image/')) {
-                thumbSrc = URL.createObjectURL(file);
-                attachmentThumb.src = thumbSrc;
-                attachmentThumb.style.display = 'block';
-            } else {
-                attachmentThumb.style.display = 'none';
-            }
-            
-            const formData = new FormData(); 
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch('/upload', { method: 'POST', body: formData }); 
-                const result = await response.json();
-                if (response.ok) { 
-                    attachedFile = result; 
-                    if (thumbSrc) attachedFile.thumbSrc = thumbSrc;
-                    
-                    if (file.type === 'application/pdf') {
-                        attachedFilenameSpan.textContent = `Parsing PDF...`;
-                        try {
-                            const arrayBuffer = await file.arrayBuffer();
-                            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                            let extractedText = "";
-                            const maxPages = Math.min(pdf.numPages, 30); 
-                            for (let i = 1; i <= maxPages; i++) {
-                                const page = await pdf.getPage(i);
-                                const textContent = await page.getTextContent();
-                                const pageText = textContent.items.map(item => item.str).join(' ');
-                                extractedText += `[Page ${i}]\n${pageText}\n\n`;
-                            }
-                            if (pdf.numPages > maxPages) extractedText += `\n[...PDF Truncated after ${maxPages} pages...]`;
-                            attachedFile.extractedText = extractedText;
-                            attachedFilenameSpan.textContent = `${result.filename} (Parsed)`;
-                        } catch (e) { console.error(e); attachedFilenameSpan.textContent = `${result.filename}`; }
-                    } else {
-                        attachedFilenameSpan.textContent = `${result.filename}`; 
-                    }
+            attachmentPreview.style.display = 'block';
 
-                    sendBtn.disabled = false; sendBtn.classList.add('active');
-                } else { 
-                    attachedFilenameSpan.textContent = `Upload Failed`; 
-                    attachedFile = null; attachmentThumb.style.display = 'none';
+            attachedFiles.forEach((file, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'attachment-chip';
+
+                let previewNode;
+                if (file.isImage && file.thumbSrc) {
+                    previewNode = document.createElement('img');
+                    previewNode.className = 'attachment-thumb';
+                    previewNode.src = file.thumbSrc;
+                    previewNode.alt = file.filename;
+                } else {
+                    previewNode = document.createElement('div');
+                    previewNode.className = 'attachment-file-icon';
+                    previewNode.textContent = '📄';
                 }
-            } catch (error) { attachedFile = null; attachmentThumb.style.display = 'none'; }
+
+                const info = document.createElement('div');
+                info.className = 'attachment-info';
+
+                const name = document.createElement('div');
+                name.className = 'attachment-name';
+                name.textContent = file.filename || 'Uploading...';
+
+                const status = document.createElement('div');
+                status.className = 'attachment-status';
+                status.textContent = file.status || 'Ready';
+
+                info.appendChild(name);
+                info.appendChild(status);
+
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-file';
+                removeBtn.title = 'Remove Attachment';
+                removeBtn.textContent = '✕';
+                removeBtn.onclick = () => removeAttachment(index);
+
+                chip.appendChild(previewNode);
+                chip.appendChild(info);
+                chip.appendChild(removeBtn);
+                attachmentList.appendChild(chip);
+            });
+
+            updateSendButtonState();
+        }
+
+        async function parsePdfText(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let extractedText = "";
+            const maxPages = Math.min(pdf.numPages, 30);
+
+            for (let i = 1; i <= maxPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                extractedText += `[Page ${i}]\n${pageText}\n\n`;
+            }
+
+            if (pdf.numPages > maxPages) {
+                extractedText += `\n[...PDF Truncated after ${maxPages} pages...]`;
+            }
+
+            return extractedText;
+        }
+
+        async function uploadSingleFile(file) {
+            const formData = new FormData();
+            formData.append('files', file);
+
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Upload failed');
+            }
+
+            return (result.files && result.files[0]) || result;
+        }
+
+        async function handleFileUpload(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) return;
+
+            const MAX_SIZE = 50 * 1024 * 1024;
+            for (const file of files) {
+                if (file.size > MAX_SIZE) {
+                    alert(`${file.name} is too large (Max 50MB).`);
+                    continue;
+                }
+
+                const localItem = {
+                    filename: file.name,
+                    isImage: file.type.startsWith('image/'),
+                    status: 'Uploading...'
+                };
+
+                if (localItem.isImage) {
+                    localItem.thumbSrc = URL.createObjectURL(file);
+                }
+
+                attachedFiles.push(localItem);
+                renderAttachmentPreview();
+
+                try {
+                    const uploaded = await uploadSingleFile(file);
+                    Object.assign(localItem, uploaded);
+
+                    if (file.type === 'application/pdf') {
+                        localItem.status = 'Parsing PDF...';
+                        renderAttachmentPreview();
+                        try {
+                            localItem.extractedText = await parsePdfText(file);
+                            localItem.status = 'Parsed';
+                        } catch (e) {
+                            console.error(e);
+                            localItem.status = 'Uploaded';
+                        }
+                    } else {
+                        localItem.status = 'Uploaded';
+                    }
+                } catch (error) {
+                    console.error(error);
+                    const index = attachedFiles.indexOf(localItem);
+                    if (index >= 0) {
+                        if (localItem.thumbSrc) {
+                            URL.revokeObjectURL(localItem.thumbSrc);
+                        }
+                        attachedFiles.splice(index, 1);
+                    }
+                    alert(`Upload failed: ${file.name}`);
+                }
+
+                renderAttachmentPreview();
+            }
+
             fileInput.value = ''; 
         }
 
-        function removeAttachment() { 
-            attachedFile = null; 
-            attachmentPreview.style.display = 'none'; 
-            attachmentThumb.src = '';
-            if(!msgInput.value.trim()) {
-                sendBtn.disabled = true; sendBtn.classList.remove('active');
+        function removeAttachment(index) { 
+            const removedFile = attachedFiles.splice(index, 1)[0];
+            if (removedFile && removedFile.thumbSrc) {
+                URL.revokeObjectURL(removedFile.thumbSrc);
             }
+            renderAttachmentPreview();
+        }
+
+        function buildAttachmentPrompt(files) {
+            const promptParts = [];
+
+            files.forEach(file => {
+                if (file.isImage) return;
+
+                if (file.extractedText) {
+                    promptParts.push(`\n\n[System: User uploaded file "${file.filename}". Extracted content below:]\n${file.extractedText}\n[End of Extracted Content]`);
+                } else {
+                    promptParts.push(`\n\n[System Hint: User sent a file "${file.filename}" at ${file.filepath}. Please read it and answer.]`);
+                }
+            });
+
+            return promptParts.join('');
         }
 
         function sendMessage() {
             let text = msgInput.value.trim(); 
-            if (!text && !attachedFile) return; 
+            if (!text && !attachedFiles.length) return; 
             if (!currentThreadId) return;
 
             currentTurnCounter++;
             
             let previewText = text;
-            if (attachedFile) {
-                if (!text) previewText = attachedFile.isImage ? "[Image]" : attachedFile.filename;
-                else previewText += " + 📎";
+            if (attachedFiles.length) {
+                if (!text) previewText = attachedFiles.length === 1 ? attachedFiles[0].filename : `${attachedFiles.length} attachments`;
+                else previewText += ` + ${attachedFiles.length} files`;
             }
             previewText = previewText.substring(0, 15) + (previewText.length > 15 ? '...' : '');
             addTimelineDot(currentTurnCounter, previewText);
@@ -1806,23 +1912,19 @@
                 inputItems.push({ type: "text", text: text });
             }
             
-            if (attachedFile) {
-                if (attachedFile.isImage) {
-                    inputItems.push({ type: "localImage", path: attachedFile.filepath });
-                } else {
-                    let contentPrompt = "";
-                    if (attachedFile.extractedText) {
-                        contentPrompt = `\n\n[System: User uploaded a PDF. Content extracted below:]\n${attachedFile.extractedText}\n[End of PDF Content]`;
-                    } else {
-                        contentPrompt = `\n\n[System Hint: User sent a file at ${attachedFile.filepath}. Please read it and answer.]`;
-                    }
+            attachedFiles.forEach(file => {
+                if (file.isImage) {
+                    inputItems.push({ type: "localImage", path: file.filepath });
+                }
+            });
 
-                    let textItem = inputItems.find(i => i.type === 'text');
-                    if (textItem) {
-                        textItem.text += contentPrompt; 
-                    } else {
-                        inputItems.push({ type: "text", text: contentPrompt });
-                    }
+            const attachmentPrompt = buildAttachmentPrompt(attachedFiles);
+            if (attachmentPrompt) {
+                let textItem = inputItems.find(i => i.type === 'text');
+                if (textItem) {
+                    textItem.text += attachmentPrompt; 
+                } else {
+                    inputItems.push({ type: "text", text: attachmentPrompt });
                 }
             }
             
@@ -1832,11 +1934,17 @@
             else if (inputItems.length > 0) { inputItems.push({ type: "text", text: safetyPrompt }); }
             else { inputItems.push({ type: "text", text: " " + safetyPrompt }); }
 
-            appendMessage('user', text, currentTurnCounter, attachedFile, inputItems);
+            appendMessage('user', text, currentTurnCounter, [...attachedFiles], inputItems);
 
             msgInput.value = ''; 
             resetInputHeight(); 
-            removeAttachment(); 
+            attachedFiles.forEach(file => {
+                if (file.thumbSrc) {
+                    URL.revokeObjectURL(file.thumbSrc);
+                }
+            });
+            attachedFiles = [];
+            renderAttachmentPreview();
             setGeneratingState(); 
             chatBox.scrollTop = chatBox.scrollHeight;
             

@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 import json
 from werkzeug.utils import secure_filename
+from uuid import uuid4
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_lab_key'
@@ -13,6 +14,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 FOLDER_DB = os.path.join(BASE_DIR, 'thread_folders.json')
+
+
+def build_unique_filepath(filename):
+    safe_name = secure_filename(filename)
+    name, ext = os.path.splitext(safe_name)
+    candidate = safe_name
+    filepath = os.path.join(UPLOAD_FOLDER, candidate)
+
+    while os.path.exists(filepath):
+        candidate = f"{name}_{uuid4().hex[:8]}{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, candidate)
+
+    return candidate, filepath
 
 
 def load_folders():
@@ -160,25 +174,32 @@ def index():
 def upload_file():
     if not session.get('logged_in'):
         return jsonify({'error': '未授权'}), 401
-    if 'file' not in request.files:
-        return jsonify({'error': '无文件'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': '未选择'}), 400
-    if file:
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
+    files = request.files.getlist('files')
+    if not files:
+        single_file = request.files.get('file')
+        if single_file:
+            files = [single_file]
+
+    valid_files = [file for file in files if file and file.filename]
+    if not valid_files:
+        return jsonify({'error': '未选择文件'}), 400
+
+    image_exts = ('.png', '.jpg', '.jpeg', '.gif', '.webp')
+    uploaded_files = []
+
+    for file in valid_files:
+        filename, filepath = build_unique_filepath(file.filename)
         file.save(filepath)
-        return jsonify(
+        uploaded_files.append(
             {
                 'message': '成功',
                 'filename': filename,
                 'filepath': filepath,
-                'isImage': filename.lower().endswith(
-                    ('.png', '.jpg', '.jpeg', '.gif', '.webp')
-                ),
+                'isImage': filename.lower().endswith(image_exts),
             }
-        )  # 确保返回 JSON 响应
+        )
+
+    return jsonify({'message': '成功', 'files': uploaded_files})  # 确保返回 JSON 响应
 
 
 if __name__ == '__main__':
