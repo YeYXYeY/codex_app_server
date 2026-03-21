@@ -748,10 +748,10 @@
 
             if (rateLimits.secondary) {
                 const secondaryRemain = 100 - rateLimits.secondary.usedPercent;
-                displayText += ` | 本周剩余: ${secondaryRemain}%`;
+                const resetDate = new Date(rateLimits.secondary.resetsAt * 1000);
+                const resetTimeStr = resetDate.toLocaleString();
+                displayText += ` | 本周剩余: ${secondaryRemain}% | 周额度重置: ${resetTimeStr}`;
                 if (secondaryRemain <= 0) {
-                    const resetDate = new Date(rateLimits.secondary.resetsAt * 1000);
-                    const resetTimeStr = resetDate.toLocaleString();
                     showModal(`本周额度已用完！\n下次更新时间：${resetTimeStr}`)
                     needWarning = true;
 
