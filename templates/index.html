@@ -503,6 +503,7 @@
         let currentTurnCounter = 0;
         let draggedThreadId = null; 
         let renderFrameId = null;
+        const backgroundTitleJobs = new Map();
         
         const contextMenu = document.getElementById('context-menu');
         const pendingRequests = new Map();
@@ -893,6 +894,7 @@
                     cachedFolders.forEach(f => { groups[f] = []; }); 
 
                     sortedThreads.forEach(thread => {
+                        if (backgroundTitleJobs.has(thread.id)) return;
                         const folderName = mapping[thread.id] || "root";
                         if (folderName === '__deleted__') return; 
                         if (!groups[folderName]) { groups[folderName] = []; }
@@ -1078,6 +1080,155 @@
             const cleaned = firstLine || text;
 
             return cleaned.length > 80 ? `${cleaned.slice(0, 80)}...` : cleaned;
+        }
+
+        function buildAutoThreadTitle(text, files = []) {
+            const cleanedText = sanitizeThreadTitle(text)
+                .replace(/^(请问|请帮我|帮我|麻烦|可以|能不能|请|分析一下|分析|总结一下|总结|解释一下|解释|看看|帮忙|我想问一下|想问一下)\s*/u, '')
+                .replace(/[。！？.!?]+$/u, '')
+                .trim();
+
+            if (cleanedText) {
+                const shortText = cleanedText.length > 24 ? `${cleanedText.slice(0, 24)}...` : cleanedText;
+                return shortText || 'New Chat';
+            }
+
+            if (files.length === 1) {
+                const filename = files[0].filename || files[0].file?.name || '';
+                const basename = filename.replace(/\.[^.]+$/, '').trim();
+                return basename || (files[0].isImage ? '图片对话' : '文件对话');
+            }
+
+            if (files.length > 1) {
+                return `${files.length} 个附件`;
+            }
+
+            return 'New Chat';
+        }
+
+        async function autoNameThreadIfNeeded(threadId, text, files = []) {
+            if (!threadId || currentTurnCounter !== 1) return;
+            if (cachedThreadNames[threadId]) return;
+
+            const threadNode = document.querySelector(`.thread-wrapper[data-id="${threadId}"] .thread-title`);
+            if (threadNode && threadNode.textContent && !/^New Chat(?:\s*\(|$)/.test(threadNode.textContent.trim())) {
+                return;
+            }
+
+            const fallbackTitle = buildAutoThreadTitle(text, files);
+            const sourceText = sanitizeThreadTitle(text);
+            const fileSummary = files.map(file => file.filename).filter(Boolean).join(', ');
+            const summaryParts = [];
+            if (sourceText) summaryParts.push(`User message: ${sourceText}`);
+            if (fileSummary) summaryParts.push(`Attached files: ${fileSummary}`);
+            if (!summaryParts.length) return;
+
+            try {
+                const tempThreadRes = await rpcCall("thread/start", { model: modelSelector.value });
+                const tempThreadId = tempThreadRes.thread.id;
+                const prompt = [
+                    "Generate a short chat title.",
+                    "Requirements:",
+                    "- 4 to 10 words",
+                    "- same language as the user's message",
+                    "- no quotes",
+                    "- no markdown",
+                    "- no trailing punctuation",
+                    "- summarize the topic, not the request style",
+                    "",
+                    ...summaryParts
+                ].join("\n");
+
+                backgroundTitleJobs.set(tempThreadId, {
+                    targetThreadId: threadId,
+                    fallbackTitle,
+                    buffer: '',
+                });
+
+                ws.send(JSON.stringify({
+                    method: "turn/start",
+                    id: reqId++,
+                    params: {
+                        threadId: tempThreadId,
+                        input: [{ type: "text", text: prompt }]
+                    }
+                }));
+            } catch (e) {
+                console.error('Auto title generation failed', e);
+            }
+        }
+
+        async function applyGeneratedThreadTitle(targetThreadId, rawTitle, fallbackTitle = 'New Chat') {
+            const normalizedTitle = sanitizeThreadTitle(rawTitle).replace(/[。！？.!?]+$/u, '').trim();
+            const finalTitle = normalizedTitle || fallbackTitle;
+            if (!finalTitle || finalTitle === 'New Chat') return;
+
+            await fetch('/api/threads/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ thread_id: targetThreadId, new_name: finalTitle })
+            });
+            await rpcCall("thread/update", { threadId: targetThreadId, id: targetThreadId, name: finalTitle, title: finalTitle });
+            cachedThreadNames[targetThreadId] = finalTitle;
+            loadThreadList();
+        }
+
+        async function finalizeBackgroundTitleJob(jobThreadId, generatedTitle = '') {
+            const job = backgroundTitleJobs.get(jobThreadId);
+            if (!job) return;
+
+            backgroundTitleJobs.delete(jobThreadId);
+            try {
+                await applyGeneratedThreadTitle(job.targetThreadId, generatedTitle || job.buffer, job.fallbackTitle);
+            } catch (e) {
+                console.error('Applying generated title failed', e);
+                if (job.fallbackTitle && job.fallbackTitle !== 'New Chat') {
+                    try {
+                        await applyGeneratedThreadTitle(job.targetThreadId, job.fallbackTitle, job.fallbackTitle);
+                    } catch (fallbackError) {
+                        console.error('Fallback title apply failed', fallbackError);
+                    }
+                }
+            }
+
+            try {
+                await rpcCall("thread/delete", { threadId: jobThreadId });
+            } catch (e) {
+                try {
+                    await rpcCall("thread/archive", { threadId: jobThreadId });
+                } catch (archiveError) {
+                    console.error('Background title thread cleanup failed', archiveError);
+                }
+            }
+        }
+
+        function handleBackgroundTitleNotification(msg) {
+            const threadId = msg.params?.threadId;
+            if (!threadId || !backgroundTitleJobs.has(threadId)) return false;
+
+            const job = backgroundTitleJobs.get(threadId);
+            if (!job) return false;
+
+            if (msg.method === "item/agentMessage/delta") {
+                job.buffer += msg.params.delta || msg.params.text || "";
+                return true;
+            }
+
+            if (msg.method === "turn/completed") {
+                finalizeBackgroundTitleJob(threadId, job.buffer);
+                return true;
+            }
+
+            if (msg.method === "turn/failed") {
+                finalizeBackgroundTitleJob(threadId, job.fallbackTitle);
+                return true;
+            }
+
+            if (msg.method === "item/completed" || msg.method === "item/message/completed") {
+                return true;
+            }
+
+            return false;
         }
 
         function renderThreadItem(thread, container) {
@@ -1505,6 +1656,10 @@
         }
 
         function handleServerNotification(msg) {
+            if (handleBackgroundTitleNotification(msg)) {
+                return;
+            }
+
             if (msg.method === "item/completed" || msg.method === "item/message/completed") {
                 if (currentAgentContentDiv) {
                     if (currentAgentContentDiv._rawText !== '') {
@@ -2045,6 +2200,8 @@
                 id: reqId++, 
                 params: { threadId: currentThreadId, input: inputItems } 
             }));
+
+            autoNameThreadIfNeeded(currentThreadId, text, validFiles);
             
             setTimeout(() => { loadThreadList(); }, 500);
         }

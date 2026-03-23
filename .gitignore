@@ -9,3 +9,4 @@ uploads/
 thread_folders.json
 # Virtual environments
 .venv
+/.tmp/
