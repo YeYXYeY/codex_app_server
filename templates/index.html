@@ -101,7 +101,9 @@
         .thread-wrapper { display: flex; align-items: center; justify-content: space-between; border-radius: 20px; transition: background 0.2s; padding-right: 8px; flex-shrink: 0;}
         .thread-wrapper:hover { background: var(--hover-bg); }
         .thread-wrapper.active { background: var(--active-bg); color: var(--active-text); font-weight: 500;}
-        .thread-item { flex: 1; padding: 10px 16px; cursor: pointer; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .thread-item { flex: 1; padding: 10px 16px; cursor: pointer; font-size: 14px; overflow: hidden; min-width: 0; }
+        .thread-title { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .thread-time { display: block; margin-top: 2px; font-size: 12px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .action-icon-btn { padding: 4px; color: var(--text-sub); cursor: pointer; font-size: 14px; border-radius: 50%; opacity: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
         .thread-wrapper:hover .action-icon-btn, .folder-header:hover .action-icon-btn { opacity: 1; }
@@ -997,6 +999,31 @@
             threadListEl.appendChild(wrapper);
         }
 
+        function formatThreadTime(thread) {
+            const source = thread.updated_at || thread.created_at;
+            if (!source) return '';
+
+            const date = new Date(source);
+            if (Number.isNaN(date.getTime())) return '';
+
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const timeText = `${hours}:${minutes}`;
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const dayDiff = Math.round((todayStart - dateStart) / 86400000);
+
+            if (dayDiff === 0) return `更新于 今天 ${timeText}`;
+            if (dayDiff === 1) return `更新于 昨天 ${timeText}`;
+            if (dayDiff === 2) return `更新于 前天 ${timeText}`;
+
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `更新于 ${month}/${day} ${timeText}`;
+        }
+
         function renderThreadItem(thread, container) {
             const wrapper = document.createElement('div');
             wrapper.className = 'thread-wrapper';
@@ -1028,7 +1055,11 @@
                 }
             }
 
-            item.textContent = displayName;
+            const updatedLabel = formatThreadTime(thread);
+            item.innerHTML = `
+                <span class="thread-title">${displayName}</span>
+                <span class="thread-time">${updatedLabel}</span>
+            `;
             item.onclick = () => { openThread(thread.id); };
 
             const actionBtn = document.createElement('div');
@@ -1189,7 +1220,8 @@
             contextMenu.style.display = 'none';
             const wrapper = document.querySelector(`.thread-wrapper[data-id="${activeContextTargetId}"]`);
             const itemDiv = wrapper.querySelector('.thread-item');
-            const currentName = itemDiv.textContent.replace(/^New Chat \(.+\)$/, 'New Chat');
+            const titleEl = itemDiv.querySelector('.thread-title');
+            const currentName = (titleEl ? titleEl.textContent : itemDiv.textContent).replace(/^New Chat \(.+\)$/, 'New Chat');
             
             itemDiv.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 4px; width: 100%;">
