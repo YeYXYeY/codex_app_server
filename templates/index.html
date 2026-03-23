@@ -1061,6 +1061,25 @@
             return `${month}/${day} ${timeText}`;
         }
 
+        function sanitizeThreadTitle(rawText) {
+            if (!rawText) return '';
+
+            let text = String(rawText);
+            text = text.replace(/\[System Safety Protocol:[\s\S]*?\]/g, ' ');
+            text = text.replace(/\[System(?: Hint)?:[\s\S]*?\]/g, ' ');
+            text = text.replace(/```[\s\S]*?```/g, ' ');
+            text = text.replace(/`[^`]*`/g, ' ');
+            text = text.replace(/\s+/g, ' ').trim();
+
+            if (!text) return '';
+
+            const firstSentence = text.split(/(?<=[。！？.!?])\s+/)[0]?.trim() || text;
+            const firstLine = firstSentence.split('\n')[0].trim();
+            const cleaned = firstLine || text;
+
+            return cleaned.length > 80 ? `${cleaned.slice(0, 80)}...` : cleaned;
+        }
+
         function renderThreadItem(thread, container) {
             const wrapper = document.createElement('div');
             wrapper.className = 'thread-wrapper';
@@ -1081,7 +1100,7 @@
             const item = document.createElement('div');
             item.className = 'thread-item';
             
-            let displayName = cachedThreadNames[thread.id] || thread.name || thread.preview;
+            let displayName = cachedThreadNames[thread.id] || sanitizeThreadTitle(thread.name) || sanitizeThreadTitle(thread.preview);
             if (!displayName) {
                 const createdTs =
                     getThreadTimestampValue(thread.createdAt) ||
@@ -2012,12 +2031,6 @@
                 }
             });
             
-            const safetyPrompt = "\n\n[System Safety Protocol: You are running in a restricted environment. File operations are strictly limited to the current directory only. Do not execute system commands or access paths outside the working directory.]";
-            let textItem = inputItems.find(i => i.type === 'text');
-            if (textItem) { textItem.text += safetyPrompt; }
-            else if (inputItems.length > 0) { inputItems.push({ type: "text", text: safetyPrompt }); }
-            else { inputItems.push({ type: "text", text: " " + safetyPrompt }); }
-
             // 传入 validFiles 数组
             appendMessage('user', text, currentTurnCounter, validFiles, inputItems);
 
