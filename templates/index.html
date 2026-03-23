@@ -878,7 +878,9 @@
                 threadListEl.innerHTML = '';
 
                 if (res.data) {
-                    res.data.forEach(t => t._ts = t.updated_at ? new Date(t.updated_at).getTime() : new Date(t.created_at || 0).getTime());
+                    res.data.forEach(t => {
+                        t._ts = getThreadTimestampValue(t.updated_at) || getThreadTimestampValue(t.created_at);
+                    });
                     const sortedThreads = res.data.sort((a, b) => {
                         return b._ts - a._ts;
                     });
@@ -999,12 +1001,38 @@
             threadListEl.appendChild(wrapper);
         }
 
-        function formatThreadTime(thread) {
-            const source = thread.updated_at || thread.created_at;
-            if (!source) return '';
+        function getThreadTimestampValue(source) {
+            if (!source) return 0;
 
-            const date = new Date(source);
-            if (Number.isNaN(date.getTime())) return '';
+            if (source instanceof Date) {
+                return Number.isNaN(source.getTime()) ? 0 : source.getTime();
+            }
+
+            if (typeof source === 'number') {
+                return source < 1e12 ? source * 1000 : source;
+            }
+
+            if (typeof source === 'string') {
+                const trimmed = source.trim();
+                if (!trimmed) return 0;
+
+                if (/^\d+$/.test(trimmed)) {
+                    const numeric = Number(trimmed);
+                    return numeric < 1e12 ? numeric * 1000 : numeric;
+                }
+
+                const parsed = new Date(trimmed).getTime();
+                return Number.isNaN(parsed) ? 0 : parsed;
+            }
+
+            return 0;
+        }
+
+        function formatThreadTime(thread) {
+            const timestamp = getThreadTimestampValue(thread.updated_at) || getThreadTimestampValue(thread.created_at) || thread._ts;
+            if (!timestamp) return '';
+
+            const date = new Date(timestamp);
 
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -1046,8 +1074,9 @@
             
             let displayName = cachedThreadNames[thread.id] || thread.name || thread.preview;
             if (!displayName) {
-                if (thread.created_at) {
-                    const d = new Date(thread.created_at);
+                const createdTs = getThreadTimestampValue(thread.created_at);
+                if (createdTs) {
+                    const d = new Date(createdTs);
                     const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                         displayName = `New Chat (${timeStr})`;
                 } else {
