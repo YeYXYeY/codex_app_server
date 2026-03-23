@@ -1052,13 +1052,13 @@
             const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             const dayDiff = Math.round((todayStart - dateStart) / 86400000);
 
-            if (dayDiff === 0) return `更新于 今天 ${timeText}`;
-            if (dayDiff === 1) return `更新于 昨天 ${timeText}`;
-            if (dayDiff === 2) return `更新于 前天 ${timeText}`;
+            if (dayDiff === 0) return `今天 ${timeText}`;
+            if (dayDiff === 1) return `昨天 ${timeText}`;
+            if (dayDiff === 2) return `前天 ${timeText}`;
 
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
-            return `更新于 ${month}/${day} ${timeText}`;
+            return `${month}/${day} ${timeText}`;
         }
 
         function renderThreadItem(thread, container) {

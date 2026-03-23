@@ -879,7 +879,11 @@
 
                 if (res.data) {
                     res.data.forEach(t => {
-                        t._ts = getThreadTimestampValue(t.updated_at) || getThreadTimestampValue(t.created_at);
+                        t._ts =
+                            getThreadTimestampValue(t.updatedAt) ||
+                            getThreadTimestampValue(t.updated_at) ||
+                            getThreadTimestampValue(t.createdAt) ||
+                            getThreadTimestampValue(t.created_at);
                     });
                     const sortedThreads = res.data.sort((a, b) => {
                         return b._ts - a._ts;
@@ -1029,7 +1033,12 @@
         }
 
         function formatThreadTime(thread) {
-            const timestamp = getThreadTimestampValue(thread.updated_at) || getThreadTimestampValue(thread.created_at) || thread._ts;
+            const timestamp =
+                getThreadTimestampValue(thread.updatedAt) ||
+                getThreadTimestampValue(thread.updated_at) ||
+                getThreadTimestampValue(thread.createdAt) ||
+                getThreadTimestampValue(thread.created_at) ||
+                thread._ts;
             if (!timestamp) return '';
 
             const date = new Date(timestamp);
@@ -1043,13 +1052,13 @@
             const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             const dayDiff = Math.round((todayStart - dateStart) / 86400000);
 
-            if (dayDiff === 0) return `更新于 今天 ${timeText}`;
-            if (dayDiff === 1) return `更新于 昨天 ${timeText}`;
-            if (dayDiff === 2) return `更新于 前天 ${timeText}`;
+            if (dayDiff === 0) return `今天 ${timeText}`;
+            if (dayDiff === 1) return `昨天 ${timeText}`;
+            if (dayDiff === 2) return `前天 ${timeText}`;
 
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const day = date.getDate().toString().padStart(2, '0');
-            return `更新于 ${month}/${day} ${timeText}`;
+            return `${month}/${day} ${timeText}`;
         }
 
         function renderThreadItem(thread, container) {
@@ -1074,7 +1083,9 @@
             
             let displayName = cachedThreadNames[thread.id] || thread.name || thread.preview;
             if (!displayName) {
-                const createdTs = getThreadTimestampValue(thread.created_at);
+                const createdTs =
+                    getThreadTimestampValue(thread.createdAt) ||
+                    getThreadTimestampValue(thread.created_at);
                 if (createdTs) {
                     const d = new Date(createdTs);
                     const timeStr = `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
