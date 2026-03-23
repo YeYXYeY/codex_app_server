@@ -508,6 +508,7 @@
         const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
 
         modelSelector.addEventListener('change', adjustModelSelectorWidth);
+        msgInput.addEventListener('paste', handlePasteUpload);
 
         function adjustModelSelectorWidth() {
             if (!modelSelector.options || modelSelector.selectedIndex < 0 || modelSelector.options.length === 0) {
@@ -1768,6 +1769,49 @@
             }
             
             fileInput.value = ''; 
+        }
+
+        async function handlePasteUpload(event) {
+            const clipboardItems = Array.from(event.clipboardData?.items || []);
+            const files = clipboardItems
+                .filter(item => item.kind === 'file')
+                .map((item, index) => {
+                    const file = item.getAsFile();
+                    if (!file) return null;
+                    if (file.name) return file;
+
+                    const extension = file.type.split('/')[1] || 'bin';
+                    return new File([file], `pasted-file-${Date.now()}-${index}.${extension}`, {
+                        type: file.type || 'application/octet-stream',
+                        lastModified: Date.now()
+                    });
+                })
+                .filter(Boolean);
+
+            if (!files.length) return;
+
+            event.preventDefault();
+
+            const MAX_SIZE = 50 * 1024 * 1024;
+
+            for (const file of files) {
+                if (file.size > MAX_SIZE) {
+                    alert(`File ${file.name} is too large (Max 50MB).`);
+                    continue;
+                }
+
+                const fileObj = {
+                    file: file,
+                    filename: file.name,
+                    statusText: `Uploading...`,
+                    isImage: file.type.startsWith('image/'),
+                    thumbSrc: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+                };
+
+                attachedFiles.push(fileObj);
+                renderAttachmentsUI();
+                uploadAndProcessFile(fileObj);
+            }
         }
 
         // 新增：独立上传和处理文件的逻辑
