@@ -153,14 +153,15 @@
         .user-bubble p { margin: 0.5em 0; }
         .user-bubble p:first-child { margin-top: 0; }
         .user-bubble p:last-child { margin-bottom: 0; }
-        .user-attachment-bubble { padding: 12px; }
+        .user-attachment-bubble { padding: 12px; width: fit-content; max-width: min(90%, 560px); }
         .message-user .content { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-        .message-attachment-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; max-width: 100%; }
+        .message-attachment-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; width: fit-content; max-width: 100%; }
         .message-attachment-card {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            width: min(220px, 100%);
+            width: clamp(160px, 22vw, 220px);
+            max-width: 100%;
             padding: 10px;
             border: 1px solid rgba(0,0,0,0.08);
             border-radius: 14px;
@@ -455,6 +456,13 @@
             border-radius: 12px;
             background: #f8f9fa;
         }
+        .preview-modal-pdf {
+            width: 100%;
+            height: min(80vh, 900px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #ffffff;
+        }
 
         .close-button {
             position: absolute;
@@ -469,6 +477,8 @@
             #input-area-wrapper { padding: 0 8px 8px; }
             #input-card { padding: 8px 12px; border-radius: 20px; }
             .user-bubble { max-width: 92%; }
+            .user-attachment-bubble { max-width: 92%; }
+            .message-attachment-card { width: min(100%, 220px); }
             #timeline-container { right: 2px; }
             .header-title { font-size: 16px; }
             .message { gap: 8px; }
@@ -890,11 +900,37 @@
             modal._onclose = null;
         }
 
+        function showPdfPreview(fileObj) {
+            const previewUrl = getAttachmentPreviewUrl(fileObj);
+            if (!previewUrl) return;
+
+            const modal = document.getElementById('custom-modal');
+            const title = (fileObj && fileObj.filename) || 'PDF preview';
+            modal.innerHTML = `
+                <div class="modal-content preview-modal-content">
+                    <div class="preview-modal-header">
+                        <div class="preview-modal-title" title="${title}">${title}</div>
+                        <span class="close-button" onclick="closeModal()">&times;</span>
+                    </div>
+                    <iframe class="preview-modal-pdf" src="${previewUrl}#toolbar=1&navpanes=0&view=FitH" title="${title}"></iframe>
+                </div>
+            `;
+            modal.style.display = 'block';
+            modal.onclick = function(event) {
+                if (event.target === modal) closeModal();
+            };
+            modal._onclose = null;
+        }
+
         function openAttachmentPreview(fileObj) {
             const normalized = normalizeMessageFile(fileObj);
             if (!normalized || !normalized.url) return;
             if (normalized.isImage) {
                 showImagePreview(normalized);
+                return;
+            }
+            if ((normalized.filename || '').toLowerCase().endsWith('.pdf')) {
+                showPdfPreview(normalized);
                 return;
             }
             window.open(normalized.url, '_blank', 'noopener');
