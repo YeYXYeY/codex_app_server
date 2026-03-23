@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from flask_cors import CORS
 import os
 import json
@@ -195,11 +195,19 @@ def upload_file():
                 'message': '成功',
                 'filename': filename,
                 'filepath': filepath,
+                'url': url_for('uploaded_file', filename=filename),
                 'isImage': filename.lower().endswith(image_exts),
             }
         )
 
     return jsonify({'message': '成功', 'files': uploaded_files})  # 确保返回 JSON 响应
+
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    if not session.get('logged_in'):
+        return jsonify({'error': '未授权'}), 401
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 if __name__ == '__main__':

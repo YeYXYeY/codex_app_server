@@ -153,6 +153,64 @@
         .user-bubble p { margin: 0.5em 0; }
         .user-bubble p:first-child { margin-top: 0; }
         .user-bubble p:last-child { margin-bottom: 0; }
+        .user-attachment-bubble { padding: 12px; }
+        .message-user .content { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .message-attachment-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; max-width: 100%; }
+        .message-attachment-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: min(220px, 100%);
+            padding: 10px;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.72);
+            color: inherit;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            text-align: left;
+        }
+        .message-attachment-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            border-color: rgba(26,115,232,0.28);
+        }
+        .message-attachment-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+            background: rgba(0,0,0,0.03);
+        }
+        .message-attachment-file {
+            width: 100%;
+            min-height: 96px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background: rgba(255,255,255,0.9);
+        }
+        .message-attachment-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .message-attachment-name {
+            font-size: 14px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .message-attachment-action {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
         
         .agent-bubble { background-color: #f4f4f4; color: var(--text-main); padding: 10px 16px; border-radius: 4px 18px 18px 18px; font-size: 16px; line-height: 1.6; max-width: 90%; word-break: break-word; }
         .agent-bubble p { margin: 0.5em 0; }
@@ -367,6 +425,35 @@
             width: 80%;
             max-width: 600px;
             border-radius: 10px;
+        }
+        .preview-modal-content {
+            width: min(92vw, 960px);
+            margin: 4vh auto;
+            padding: 16px;
+            background: #ffffff;
+        }
+        .preview-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .preview-modal-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .preview-modal-image {
+            display: block;
+            width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #f8f9fa;
         }
 
         .close-button {
@@ -716,6 +803,17 @@
             }
         }
 
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            if (!modal) return;
+            modal.style.display = "none";
+            if (typeof modal._onclose === 'function') {
+                const onclose = modal._onclose;
+                modal._onclose = null;
+                onclose();
+            }
+        }
+
         function showModal(message, onclose) {
             const modal = document.getElementById('custom-modal');
             modal.innerHTML = `
@@ -736,13 +834,158 @@
                     closeModal();
                 }
             });
-            window.closeModal = function() {
-                modal.style.display = "none";
-                if(onclose) {
-                    onclose();
-                }
+            modal._onclose = onclose || null;
+        }
 
-             }
+        function getFilenameFromPath(pathValue) {
+            if (!pathValue) return '';
+            const normalized = String(pathValue).replace(/\\/g, '/');
+            const parts = normalized.split('/');
+            return parts[parts.length - 1] || '';
+        }
+
+        function buildUploadedFileUrl(pathValue, filename = null) {
+            const resolvedFilename = filename || getFilenameFromPath(pathValue);
+            return resolvedFilename ? `/uploads/${encodeURIComponent(resolvedFilename)}` : null;
+        }
+
+        function normalizeMessageFile(fileObj) {
+            if (!fileObj) return null;
+            const filename = fileObj.filename || getFilenameFromPath(fileObj.filepath) || 'Unnamed file';
+            const filepath = fileObj.filepath || filename;
+            const url = fileObj.url || fileObj.fileUrl || buildUploadedFileUrl(filepath, filename) || fileObj.thumbSrc || null;
+            return {
+                ...fileObj,
+                filename,
+                filepath,
+                url,
+                isImage: Boolean(fileObj.isImage)
+            };
+        }
+
+        function getAttachmentPreviewUrl(fileObj) {
+            const normalized = normalizeMessageFile(fileObj);
+            return normalized ? normalized.url : null;
+        }
+
+        function showImagePreview(fileObj) {
+            const previewUrl = getAttachmentPreviewUrl(fileObj);
+            if (!previewUrl) return;
+
+            const modal = document.getElementById('custom-modal');
+            const title = (fileObj && fileObj.filename) || 'Image preview';
+            modal.innerHTML = `
+                <div class="modal-content preview-modal-content">
+                    <div class="preview-modal-header">
+                        <div class="preview-modal-title" title="${title}">${title}</div>
+                        <span class="close-button" onclick="closeModal()">&times;</span>
+                    </div>
+                    <img class="preview-modal-image" src="${previewUrl}" alt="${title}">
+                </div>
+            `;
+            modal.style.display = 'block';
+            modal.onclick = function(event) {
+                if (event.target === modal) closeModal();
+            };
+            modal._onclose = null;
+        }
+
+        function openAttachmentPreview(fileObj) {
+            const normalized = normalizeMessageFile(fileObj);
+            if (!normalized || !normalized.url) return;
+            if (normalized.isImage) {
+                showImagePreview(normalized);
+                return;
+            }
+            window.open(normalized.url, '_blank', 'noopener');
+        }
+
+        function buildMessageAttachmentList(files) {
+            const list = document.createElement('div');
+            list.className = 'message-attachment-list';
+
+            files
+                .map(normalizeMessageFile)
+                .filter(Boolean)
+                .forEach(fileObj => {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'message-attachment-card';
+                    card.title = fileObj.filename;
+                    card.onclick = () => openAttachmentPreview(fileObj);
+
+                    if (fileObj.isImage && fileObj.url) {
+                        const img = document.createElement('img');
+                        img.src = fileObj.url;
+                        img.alt = fileObj.filename;
+                        card.appendChild(img);
+                    } else {
+                        const fileIcon = document.createElement('div');
+                        fileIcon.className = 'message-attachment-file';
+                        fileIcon.textContent = '📄';
+                        card.appendChild(fileIcon);
+                    }
+
+                    const meta = document.createElement('div');
+                    meta.className = 'message-attachment-meta';
+                    meta.innerHTML = `
+                        <span class="message-attachment-name">${fileObj.filename}</span>
+                        <span class="message-attachment-action">${fileObj.isImage ? '点击预览' : '点击打开文件'}</span>
+                    `;
+                    card.appendChild(meta);
+                    list.appendChild(card);
+                });
+
+            return list;
+        }
+
+        function extractFilesFromHistoryText(rawText) {
+            const extractedFiles = [];
+            let visibleText = rawText || '';
+
+            visibleText = visibleText.replace(/\n?\n?\[System: User uploaded a PDF \(([^)]+)\)\. Content extracted below:\]\n[\s\S]*?\n\[End of PDF Content\]/g, (_, filename) => {
+                extractedFiles.push(normalizeMessageFile({ filename, filepath: filename, isImage: false }));
+                return '';
+            });
+
+            visibleText = visibleText.replace(/\n?\n?\[System Hint: User sent a file \(([^)]+)\) at ([^\n]+)\. Please read it and answer\.\]/g, (_, filename, filepath) => {
+                extractedFiles.push(normalizeMessageFile({ filename, filepath, isImage: false }));
+                return '';
+            });
+
+            visibleText = visibleText.replace(/\n{3,}/g, '\n\n').trim();
+            return { visibleText, extractedFiles };
+        }
+
+        function extractUserMessageDisplayData(contentItems) {
+            const files = [];
+            const textSegments = [];
+
+            (contentItems || []).forEach(item => {
+                if (item.type === 'localImage' && item.path) {
+                    files.push(normalizeMessageFile({
+                        filename: getFilenameFromPath(item.path),
+                        filepath: item.path,
+                        isImage: true
+                    }));
+                } else if (item.type === 'text' && item.text) {
+                    textSegments.push(item.text);
+                }
+            });
+
+            const { visibleText, extractedFiles } = extractFilesFromHistoryText(textSegments.join('\n'));
+            const dedupedFiles = [];
+            const seen = new Set();
+
+            [...files, ...extractedFiles].forEach(fileObj => {
+                if (!fileObj) return;
+                const fileKey = `${fileObj.filename}::${fileObj.filepath || fileObj.url || ''}`;
+                if (seen.has(fileKey)) return;
+                seen.add(fileKey);
+                dedupedFiles.push(fileObj);
+            });
+
+            return { text: visibleText, files: dedupedFiles };
         }
 
         function updateRateLimitUI(rateLimits) {
@@ -1395,11 +1638,14 @@
                         if(turn.items) {
                             turn.items.forEach(item => {
                                 if (item.type === 'userMessage') { 
-                                    const text = item.content.find(c => c.type === 'text')?.text || "";
+                                    const historyInputItems = item.content || [];
+                                    const displayData = extractUserMessageDisplayData(historyInputItems);
+                                    const text = displayData.text || "";
                                     turnPreviewText = text.substring(0, 15) + (text.length > 15 ? '...' : '');
-                                    
-                                    const historyInputItems = [{ type: "text", text: text }];
-                                    appendMessage('user', text, currentTurnCounter, null, historyInputItems); 
+                                    if (!turnPreviewText && displayData.files.length > 0) {
+                                        turnPreviewText = displayData.files.length === 1 ? displayData.files[0].filename : `[${displayData.files.length} Files]`;
+                                    }
+                                    appendMessage('user', text, currentTurnCounter, displayData.files, historyInputItems); 
                                 } else if (item.type === 'agentMessage') { 
                                     appendMessage('agent', item.text || "");
                                 }
@@ -1674,57 +1920,29 @@
             contentContainer.className = 'content';
             
             if (role === 'user') { 
-                const bubble = document.createElement('div');
-                bubble.className = 'user-bubble';
+                const normalizedFiles = (files || []).map(normalizeMessageFile).filter(Boolean);
 
-                // 渲染多文件列表到气泡中
-                if (files && files.length > 0) {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.style.display = 'flex';
-                    imgContainer.style.flexWrap = 'wrap';
-                    imgContainer.style.gap = '8px';
-                    imgContainer.style.marginBottom = text ? '8px' : '0';
-
-                    const fileContainer = document.createElement('div');
-                    fileContainer.style.display = 'flex';
-                    fileContainer.style.flexDirection = 'column';
-                    fileContainer.style.gap = '4px';
-                    fileContainer.style.marginBottom = text ? '8px' : '0';
-
-                    files.forEach(f => {
-                        if (f.isImage && f.thumbSrc) {
-                            const img = document.createElement('img');
-                            img.src = f.thumbSrc;
-                            img.style.maxWidth = '200px';
-                            img.style.maxHeight = '200px';
-                            img.style.borderRadius = '12px';
-                            img.style.display = 'block';
-                            imgContainer.appendChild(img);
-                        } else {
-                            const fileDiv = document.createElement('div');
-                            fileDiv.textContent = `[Attachment: ${f.filename}]`;
-                            fileDiv.style.fontSize = '14px';
-                            fileDiv.style.opacity = '0.8';
-                            fileContainer.appendChild(fileDiv);
-                        }
-                    });
-
-                    if (imgContainer.children.length > 0) bubble.appendChild(imgContainer);
-                    if (fileContainer.children.length > 0) bubble.appendChild(fileContainer);
+                if (normalizedFiles.length > 0) {
+                    const attachmentBubble = document.createElement('div');
+                    attachmentBubble.className = 'user-bubble user-attachment-bubble';
+                    attachmentBubble.appendChild(buildMessageAttachmentList(normalizedFiles));
+                    contentContainer.appendChild(attachmentBubble);
                 }
                 
                 if (text) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'user-bubble';
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = marked.parse(text).trim();
                     while (tempDiv.firstChild) {
                         bubble.appendChild(tempDiv.firstChild);
                     }
+                    contentContainer.appendChild(bubble);
                 }
                 
                 if (inputItems) {
                     wrapper.dataset.inputItems = JSON.stringify(inputItems);
                 }
-                contentContainer.appendChild(bubble);
                 contentWrapper.appendChild(contentContainer);
             } else { 
                 const avatar = document.createElement('div'); 
@@ -1935,6 +2153,8 @@
                     const uploaded = (result.files && result.files[0]) || result;
                     fileObj.filepath = uploaded.filepath || uploaded.filename || fileObj.filepath;
                     fileObj.filename = uploaded.filename || fileObj.filename;
+                    fileObj.fileUrl = uploaded.url || buildUploadedFileUrl(fileObj.filepath, fileObj.filename);
+                    fileObj.url = fileObj.fileUrl;
                     fileObj.isImage = typeof uploaded.isImage === 'boolean' ? uploaded.isImage : fileObj.isImage;
                     fileObj.statusText = 'Uploaded';
                     
@@ -1972,12 +2192,20 @@
         // 修改点：根据 Index 移除数组内的指定文件
         function removeAttachment(index) { 
             if (index > -1 && index < attachedFiles.length) {
+                if (attachedFiles[index].thumbSrc) {
+                    URL.revokeObjectURL(attachedFiles[index].thumbSrc);
+                }
                 attachedFiles.splice(index, 1);
             }
             renderAttachmentsUI();
         }
 
         function clearAttachments() {
+            attachedFiles.forEach(fileObj => {
+                if (fileObj.thumbSrc) {
+                    URL.revokeObjectURL(fileObj.thumbSrc);
+                }
+            });
             attachedFiles = [];
             renderAttachmentsUI();
         }
