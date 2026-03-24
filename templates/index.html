@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -692,7 +692,7 @@
         let renderFrameId = null;
 
         const UPDATE_ANNOUNCEMENT = {
-            version: '2026.03.23',
+            version: '2026.03.24',
             title: '更新说明',
             subtitle: '本次主要补了附件体验和会话展示。这个弹窗只会在新版本首次打开时出现一次。',
             features: [
@@ -703,6 +703,7 @@
             fixes: [
                 '修复刷新后历史图片不显示的问题，改为走稳定文件 URL 恢复。',
                 '修复附件名称容易显示 undefined 的问题。',
+                '修复某些情况下历史会话不能正确加载的问题。',
                 '优化会话标题、更新时间和附件展示的一致性。'
             ]
         };
@@ -1302,7 +1303,7 @@
                 const mapping = fData.mapping || {};
                 cachedThreadNames = fData.thread_names || {};
 
-                const res = await rpcCall("thread/list", { limit: 50 });
+                const res = await rpcCall("thread/list", { limit: 1000 });
                 threadListEl.innerHTML = '';
 
                 if (res.data) {
