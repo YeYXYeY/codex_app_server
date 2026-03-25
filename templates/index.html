@@ -704,7 +704,8 @@
                 '修复刷新后历史图片不显示的问题，改为走稳定文件 URL 恢复。',
                 '修复附件名称容易显示 undefined 的问题。',
                 '修复某些情况下历史会话不能正确加载的问题。',
-                '优化会话标题、更新时间和附件展示的一致性。'
+                '优化会话标题、更新时间和附件展示的一致性。',
+                '修复消息复制可能失败的问题。'
             ]
         };
         
@@ -2157,12 +2158,21 @@
                 copyBtn.className = 'msg-action-btn';
                 copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg> Copy Full`;
                 copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(textDiv._rawText || textDiv.innerText).then(() => {
+                    const textToCopy = textDiv._rawText || textDiv.innerText;
+                    const showSuccess = () => {
                         copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg> Copied`;
                         setTimeout(() => { 
                             copyBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg> Copy Full`;
                         }, 2000);
-                    });
+                    };
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(textToCopy)
+                            .then(showSuccess)
+                            .catch(() => copyFallback(textToCopy, showSuccess));
+                    } else {
+                        copyFallback(textToCopy, showSuccess);
+                    }
                 };
                 
                 const regenBtn = document.createElement('button');
