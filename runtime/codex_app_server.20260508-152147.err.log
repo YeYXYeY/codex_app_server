@@ -1,0 +1,11 @@
+codex app-server (WebSockets)
+  listening on: ws://127.0.0.1:4500
+  readyz: http://127.0.0.1:4500/readyz
+  healthz: http://127.0.0.1:4500/healthz
+  note: binds localhost only (use SSH port-forwarding for remote access)
+[2m2026-05-08T07:22:02.682791Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-05-08T07:22:02.682817Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-05-08T07:22:02.708867Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-05-08T07:22:06.497893Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-05-08T07:22:06.498014Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-05-08T07:22:06.498054Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))

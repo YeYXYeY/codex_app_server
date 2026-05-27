@@ -666,7 +666,11 @@
     </div>
 
     <script>
-        const SERVER_WS_URL = `ws://${window.location.hostname}:4500`; 
+        const BRIDGE_RPC_URL = '/api/bridge/rpc';
+        const BRIDGE_NOTIFY_URL = '/api/bridge/notify';
+        const BRIDGE_EVENTS_URL = '/api/bridge/events';
+        const BRIDGE_DISCONNECT_URL = '/api/bridge/disconnect';
+        const BRIDGE_EVENT_TIMEOUT_SECONDS = 25;
         
         marked.setOptions({
             highlight: function(code, lang) {
@@ -676,14 +680,26 @@
             breaks: true
         });
 
-        let ws;
-        let reqId = 1;
         let currentThreadId = null;
         let currentAgentContentDiv = null;
         let attachedFiles = []; // 替换原单文件变量
         let isGenerating = false;
+        let bridgeEventLoopRunning = false;
+        let bridgeEventLoopStopped = false;
+        let hasShownBridgeError = false;
+
+        let bridgeClientId = sessionStorage.getItem('bridge_client_id');
+        if (!bridgeClientId) {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                bridgeClientId = window.crypto.randomUUID();
+            } else {
+                bridgeClientId = `bridge-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+            }
+            sessionStorage.setItem('bridge_client_id', bridgeClientId);
+        }
         
         let cachedFolders = []; 
+        let cachedThreadFolderMapping = {};
         let cachedThreadNames = {}; 
         let activeContextMenuType = null; 
         let activeContextTargetId = null; 
@@ -698,7 +714,8 @@
             features: [
                 '用户附件改成独立气泡，图片、PDF、普通文件都可以单独点击。',
                 '图片支持页内大图预览，PDF 支持页内弹窗预览。',
-                '支持粘贴上传图片、PDF 和可被浏览器识别的文件对象。'
+                '支持粘贴上传图片、PDF 和可被浏览器识别的文件对象。',
+                '支持展示当前所在文件夹。'
             ],
             fixes: [
                 '修复刷新后历史图片不显示的问题，改为走稳定文件 URL 恢复。',
@@ -710,7 +727,6 @@
         };
         
         const contextMenu = document.getElementById('context-menu');
-        const pendingRequests = new Map();
         const chatBox = document.getElementById('chat-box');
         const timelineContainer = document.getElementById('timeline-container');
         const msgInput = document.getElementById('msg-input');
@@ -719,6 +735,7 @@
         const thinkingStatus = document.getElementById('thinking-status');
         const threadListEl = document.getElementById('thread-list');
         const modelSelector = document.getElementById('model-selector');
+        const headerTitleEl = document.querySelector('.header-title');
         
         const fileInput = document.getElementById('file-input');
         const attachmentPreviewContainer = document.getElementById('attachment-preview-container'); // 多文件预览容器
@@ -727,6 +744,19 @@
 
         modelSelector.addEventListener('change', adjustModelSelectorWidth);
         msgInput.addEventListener('paste', handlePasteUpload);
+
+        function getCurrentThreadFolderName() {
+            if (!currentThreadId) return '';
+            const folderName = cachedThreadFolderMapping[currentThreadId];
+            if (!folderName || folderName === '__deleted__') return '';
+            return folderName;
+        }
+
+        function refreshHeaderTitle() {
+            if (!headerTitleEl) return;
+            const folderName = getCurrentThreadFolderName();
+            headerTitleEl.textContent = folderName ? `📁 ${folderName}` : 'Codex App Server';
+        }
 
         function adjustModelSelectorWidth() {
             if (!modelSelector.options || modelSelector.selectedIndex < 0 || modelSelector.options.length === 0) {
@@ -851,62 +881,87 @@
             sendBtn.disabled = true;
         }
 
-        function initWebSocket() {
-            updateConnectionStatus('connecting');
-            ws = new WebSocket(SERVER_WS_URL);
-            
-            ws.onopen = async () => {
-                updateConnectionStatus('connected');
-                chatBox.innerHTML = ''; 
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showBridgeConnectionError() {
+            if (hasShownBridgeError) return;
+            hasShownBridgeError = true;
+            appendSysMsg('Bridge connection failed. Please check if `codex app-server --listen ws://127.0.0.1:4500` is running, then refresh.');
+        }
+
+        function processBridgeEvent(msg) {
+            if (!msg || typeof msg !== 'object') return;
+            if (msg.method === "account/rateLimits/updated" && msg.params && msg.params.rateLimits) {
+                updateRateLimitUI(msg.params.rateLimits);
+            }
+            if (msg.method) {
+                handleServerNotification(msg);
+            }
+        }
+
+        async function startBridgeEventLoop() {
+            if (bridgeEventLoopRunning) return;
+            bridgeEventLoopRunning = true;
+
+            while (!bridgeEventLoopStopped) {
                 try {
-                    await rpcCall("initialize", { clientInfo: { name: "codex_gemini_ui", version: "19.0.0" } });
-                    ws.send(JSON.stringify({ method: "initialized", params: {} }));
-                    
-                    await probeAvailableModels();
-                    await loadThreadList();
-                    await fetchRateLimits();
-                    
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const threadFromUrl = urlParams.get('thread');
-                    if (threadFromUrl) {
-                        await openThread(threadFromUrl, true);
-                    } else {
-                        await createNewThread(true);
+                    const res = await fetch(`${BRIDGE_EVENTS_URL}?client_id=${encodeURIComponent(bridgeClientId)}&timeout=${BRIDGE_EVENT_TIMEOUT_SECONDS}`);
+                    const payload = await res.json();
+                    if (!res.ok) {
+                        throw new Error(payload?.error?.message || `events poll failed (${res.status})`);
                     }
-                    setTimeout(() => showUpdateAnnouncement(), 200);
-                } catch (e) { 
-                    appendSysMsg('System initialization failed, check backend.'); 
-                }
-            };
-            
-            ws.onmessage = (event) => {
-                const msg = JSON.parse(event.data);
-                if (msg.id && pendingRequests.has(msg.id)) {
-                    if (msg.error) {
-                        pendingRequests.get(msg.id).reject(msg.error);
-                    } else {
-                        pendingRequests.get(msg.id).resolve(msg.result);
+
+                    const events = Array.isArray(payload.events) ? payload.events : [];
+                    events.forEach(processBridgeEvent);
+                    if (payload.connected === false) {
+                        throw new Error('bridge upstream disconnected');
                     }
-                    pendingRequests.delete(msg.id);
-                } else if (msg.method === "account/rateLimits/updated") {
-                    if (msg.params && msg.params.rateLimits) {
-                        updateRateLimitUI(msg.params.rateLimits);
-                    }
+                    updateConnectionStatus('connected');
+                    hasShownBridgeError = false;
+                } catch (error) {
+                    console.error('Bridge event loop error:', error);
+                    updateConnectionStatus('disconnected');
+                    toggleUIState(false);
+                    showBridgeConnectionError();
+                    await sleep(1200);
                 }
-                
-                if (msg.method) {
-                    handleServerNotification(msg);
+            }
+
+            bridgeEventLoopRunning = false;
+        }
+
+        async function initBridgeTransport() {
+            updateConnectionStatus('connecting');
+            chatBox.innerHTML = '';
+
+            try {
+                await rpcCall("initialize", { clientInfo: { name: "codex_gemini_ui", version: "19.0.0" } });
+                await rpcNotify("initialized", {});
+
+                updateConnectionStatus('connected');
+                hasShownBridgeError = false;
+                bridgeEventLoopStopped = false;
+                startBridgeEventLoop();
+
+                await probeAvailableModels();
+                await loadThreadList();
+                await fetchRateLimits();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const threadFromUrl = urlParams.get('thread');
+                if (threadFromUrl) {
+                    await openThread(threadFromUrl, true);
+                } else {
+                    await createNewThread(true);
                 }
-            };
-            
-            ws.onerror = (error) => {
-                console.error("WebSocket Error:", error);
-                appendSysMsg('WebSocket connection to local server failed. Please check if the `codex app-server` is running correctly, then refresh.');
-            };
-            ws.onclose = () => { 
+                setTimeout(() => showUpdateAnnouncement(), 200);
+            } catch (e) {
+                console.error('Bridge init failed:', e);
                 updateConnectionStatus('disconnected');
-                toggleUIState(false); 
-            };
+                showBridgeConnectionError();
+            }
         }
 
         function updateConnectionStatus(status) {
@@ -1259,12 +1314,41 @@
             }
         }
 
-        function rpcCall(method, params) {
-            return new Promise((resolve, reject) => {
-                const id = reqId++;
-                pendingRequests.set(id, { resolve, reject });
-                ws.send(JSON.stringify({ method, id, params }));
+        async function rpcCall(method, params) {
+            const res = await fetch(BRIDGE_RPC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    client_id: bridgeClientId,
+                    method,
+                    params: params ?? {}
+                })
             });
+
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw payload?.error || { message: `RPC HTTP ${res.status}` };
+            }
+            if (payload.error) {
+                throw payload.error;
+            }
+            return payload.result;
+        }
+
+        async function rpcNotify(method, params) {
+            const res = await fetch(BRIDGE_NOTIFY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    client_id: bridgeClientId,
+                    method,
+                    params: params ?? {}
+                })
+            });
+            const payload = await res.json().catch(() => ({}));
+            if (!res.ok || payload.error) {
+                throw payload?.error || { message: `Notify HTTP ${res.status}` };
+            }
         }
 
         function showNewFolderInput() {
@@ -1302,6 +1386,7 @@
                 
                 cachedFolders = (fData.folders || []).filter(f => f !== '__deleted__');
                 const mapping = fData.mapping || {};
+                cachedThreadFolderMapping = mapping;
                 cachedThreadNames = fData.thread_names || {};
 
                 const res = await rpcCall("thread/list", { limit: 1000 });
@@ -1374,6 +1459,7 @@
                 if(currentThreadId) {
                     updateSidebarActive(currentThreadId);
                 }
+                refreshHeaderTitle();
             } catch (e) { }
         }
 
@@ -1510,6 +1596,12 @@
             return cleaned.length > 80 ? `${cleaned.slice(0, 80)}...` : cleaned;
         }
 
+        function getResolvedThreadTitle(thread) {
+            const threadId = thread.id;
+            if (cachedThreadNames[threadId]) return cachedThreadNames[threadId];
+            return sanitizeThreadTitle(thread.name) || sanitizeThreadTitle(thread.preview);
+        }
+
         function renderThreadItem(thread, container) {
             const wrapper = document.createElement('div');
             wrapper.className = 'thread-wrapper';
@@ -1530,7 +1622,7 @@
             const item = document.createElement('div');
             item.className = 'thread-item';
             
-            let displayName = cachedThreadNames[thread.id] || sanitizeThreadTitle(thread.name) || sanitizeThreadTitle(thread.preview);
+            let displayName = getResolvedThreadTitle(thread);
             if (!displayName) {
                 const createdTs =
                     getThreadTimestampValue(thread.createdAt) ||
@@ -1636,6 +1728,7 @@
                     } catch(e) { console.error("Rename failed", e); }
                 }
                 await loadThreadList();
+                refreshHeaderTitle();
             };
             
             input.onkeydown = (e) => {
@@ -1699,7 +1792,8 @@
                 try { await rpcCall("thread/delete", { threadId: activeContextTargetId }); } catch(e) { }
                 if (currentThreadId === activeContextTargetId) { 
                     chatBox.innerHTML = ''; currentThreadId = null; timelineContainer.innerHTML = '';
-                window.history.pushState({}, '', window.location.pathname);
+                    window.history.pushState({}, '', window.location.pathname);
+                    refreshHeaderTitle();
                 }
                 loadThreadList();
             }
@@ -1739,6 +1833,7 @@
                     } catch(e) { console.error("Rename failed", e); }
                 }
                 await loadThreadList();
+                refreshHeaderTitle();
             };
 
             input.onkeydown = (e) => {
@@ -1787,6 +1882,7 @@
                 if (!skipHistory) {
                     window.history.pushState({threadId: currentThreadId}, '', `?thread=${currentThreadId}`);
                 }
+                refreshHeaderTitle();
                 toggleUIState(true); 
                 await loadThreadList();
             } catch (e) { }
@@ -1847,6 +1943,7 @@
                 if (!skipHistory) {
                     window.history.pushState({threadId: currentThreadId}, '', `?thread=${currentThreadId}`);
                 }
+                refreshHeaderTitle();
                 updateSidebarActive(currentThreadId); 
                 toggleUIState(true);
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -1885,7 +1982,7 @@
         
         function stopGenerating() {
             if (isGenerating && currentThreadId) {
-                ws.send(JSON.stringify({ method: "turn/cancel", id: reqId++, params: { threadId: currentThreadId } }));
+                rpcCall("turn/cancel", { threadId: currentThreadId }).catch(() => {});
                 isGenerating = false; 
                 
                 if (currentAgentContentDiv) {
@@ -1933,7 +2030,11 @@
             if (targetAgentMsg) targetAgentMsg.remove();
             setGeneratingState();
 
-            ws.send(JSON.stringify({ method: "turn/start", id: reqId++, params: { threadId: currentThreadId, input: inputItems } }));
+            rpcCall("turn/start", { threadId: currentThreadId, input: inputItems }).catch(error => {
+                appendSysMsg("Regenerate failed.");
+                console.error("Regenerate failed:", error);
+                toggleUIState(true);
+            });
             setTimeout(() => { loadThreadList(); }, 500);
         }
 
@@ -2464,11 +2565,11 @@
             setGeneratingState(); 
             chatBox.scrollTop = chatBox.scrollHeight;
             
-            ws.send(JSON.stringify({ 
-                method: "turn/start", 
-                id: reqId++, 
-                params: { threadId: currentThreadId, input: inputItems } 
-            }));
+            rpcCall("turn/start", { threadId: currentThreadId, input: inputItems }).catch(error => {
+                appendSysMsg("Send failed.");
+                console.error("Send failed:", error);
+                toggleUIState(true);
+            });
             
             setTimeout(() => { loadThreadList(); }, 500);
         }
@@ -2499,7 +2600,17 @@
             }
         });
 
-        window.onload = initWebSocket;
+        window.addEventListener('beforeunload', () => {
+            bridgeEventLoopStopped = true;
+            fetch(BRIDGE_DISCONNECT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ client_id: bridgeClientId }),
+                keepalive: true
+            }).catch(() => {});
+        });
+
+        window.onload = initBridgeTransport;
     </script>
 
 </body>

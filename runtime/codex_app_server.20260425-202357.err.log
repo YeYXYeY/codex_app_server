@@ -1,0 +1,32 @@
+codex app-server (WebSockets)
+  listening on: ws://127.0.0.1:4500
+  readyz: http://127.0.0.1:4500/readyz
+  healthz: http://127.0.0.1:4500/healthz
+  note: binds localhost only (use SSH port-forwarding for remote access)
+[2m2026-04-25T12:25:22.544891Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:25:22.545041Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:25:22.546088Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:25:22.872196Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:25:22.873382Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:25:22.874659Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:26:34.878317Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.9 seconds
+Output:
+
+[2m2026-04-25T12:26:48.874442Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.8 seconds
+Output:
+
+[2m2026-04-25T12:26:48.895726Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.8 seconds
+Output:
+
+[2m2026-04-25T12:27:13.931362Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:13.933347Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:13.933614Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:20.488169Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:20.488646Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:20.488972Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:26.826476Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:26.829406Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:27:26.829846Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))

@@ -1,0 +1,26 @@
+codex app-server (WebSockets)
+  listening on: ws://127.0.0.1:4500
+  readyz: http://127.0.0.1:4500/readyz
+  healthz: http://127.0.0.1:4500/healthz
+  note: binds localhost only (use SSH port-forwarding for remote access)
+[2m2026-04-25T12:36:40.268428Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:36:40.268827Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:36:40.285209Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:36:40.400628Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:36:40.401153Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:36:40.401973Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T12:38:06.908521Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.8 seconds
+Output:
+
+[2m2026-04-25T12:38:08.374013Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 2.2 seconds
+Output:
+[31;1mResourceUnavailable: [0m
+[31;1m[36;1mLine |[0m
+[31;1m[36;1m[36;1m   2 | [0m [36;1mpython --version[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~~~[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mProgram 'python.exe' failed to run: An error occurred trying to start process 'C:\Users\Felix\AppData\Local\Microsoft\WindowsApps\python.exe' with working directory 'C:\Users\Felix\Desktop\Coding\codex_app_server'. The file cannot be accessed by the system.At line:2 char:1[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ python --version[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ ~~~~~~~~~~~~~~~~.[0m
+

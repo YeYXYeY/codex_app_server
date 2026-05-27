@@ -1,0 +1,567 @@
+codex app-server (WebSockets)
+  listening on: ws://127.0.0.1:4500
+  readyz: http://127.0.0.1:4500/readyz
+  healthz: http://127.0.0.1:4500/healthz
+  note: binds localhost only (use SSH port-forwarding for remote access)
+[2m2026-04-25T11:29:52.887032Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:29:52.888648Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:29:52.890924Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:29:56.488499Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:29:56.488999Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:29:56.489313Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:30:04.405407Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:30:04.406504Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:30:04.406834Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:32:00.154352Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:32:00.154587Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:32:00.155052Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:09.012998Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:09.016308Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:09.020036Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:15.155318Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:15.158485Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:35:15.158978Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:43:32.152407Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:43:32.152492Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:43:32.152918Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:44:13.681360Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.5 seconds
+Total output lines: 660
+Output:
+app.py:6:import threading
+app.py:16:ACCESS_CODE = 'autochem2026'
+app.py:21:FOLDER_DB = os.path.join(BASE_DIR, 'thread_folders.json')
+app.py:25:AUTO_TITLE_WORKER_CLIENT_ID = os.environ.get('CODEX_AUTO_TITLE_WORKER_CLIENT_ID', '__auto_title_worker__')
+app.py:26:AUTO_TITLE_LIGHT_MODEL_HINT = os.environ.get('CODEX_AUTO_TITLE_LIGHT_MODEL', 'gpt-5.4-mini')
+app.py:27:AUTO_TITLE_WORKER_ROTATE_USES = int(os.environ.get('CODEX_AUTO_TITLE_ROTATE_USES', '30'))
+app.py:28:AUTO_TITLE_GENERATION_TIMEOUT_SECONDS = int(os.environ.get('CODEX_AUTO_TITLE_GENERATION_TIMEOUT_SECONDS', '55'))
+app.py:31:bridge_clients_lock = threading.Lock()
+app.py:32:auto_title_lock = threading.Lock()
+app.py:47:        self.ws_lock = threading.Lock()
+app.py:48:        self.send_lock = threading.Lock()
+app.py:49:        self.pending_lock = threading.Lock()
+app.py:50:        self.events_cond = threading.Condition()
+app.py:53:        self.reader_thread = None
+app.py:82:            self.reader_thread = threading.Thread(target=self._reader_loop, daemon=True)
+app.py:83:            self.reader_thread.start()
+app.py:176:            event = threading.Event()
+app.py:261:    if 'thread_names' not in data or not isinstance(data['thread_names'], dict):
+app.py:262:        data['thread_names'] = {}
+app.py:263:    if 'thread_auto_names' not in data or not isinstance(data['thread_auto_names'], dict):
+app.py:264:        data['thread_auto_names'] = {}
+app.py:265:    if 'hidden_thread_ids' not in data or not isinstance(data['hidden_thread_ids'], list):
+app.py:266:        data['hidden_thread_ids'] = []
+app.py:267:    if 'auto_title_worker' not in data or not isinstance(data['auto_title_worker'], dict):
+app.py:268:        data['auto_title_worker'] = {}
+app.py:270:    worker_thread_id = data['auto_title_worker'].get('thread_id')
+app.py:271:    if worker_thread_id:
+app.py:272:        hidden_ids = set(data['hidden_thread_ids'])
+app.py:273:        hidden_ids.add(worker_thread_id)
+app.py:274:        data['hidden_thread_ids'] = sorted(hidden_ids)
+app.py:324:        {'clientInfo': {'name': 'codex_auto_title_worker', 'version': '1.0.0'}},
+app.py:330:def add_hidden_thread_id(db, thread_id):
+app.py:331:    if not thread_id:
+app.py:333:    hidden_ids = set(db.get('hidden_thread_ids') or [])
+app.py:334:    hidden_ids.add(thread_id)
+app.py:335:    db['hidden_thread_ids'] = sorted(hidden_ids)
+app.py:338:def sanitize_title_source_text(text):
+app.py:374:    text = sanitize_title_source_text('\n'.join(text_segments))
+app.py:395:                assistant_text = sanitize_title_source_text(item.get('text') or '')[:800]
+app.py:402:def trim_title_text(text, max_chars=32):
+app.py:415:def build_heuristic_title(user_text, assistant_text):
+app.py:417:    source = sanitize_title_source_text(source)
+app.py:427:    return trim_title_text(candidate) or 'New Chat'
+app.py:438:            text = sanitize_title_source_text(item.get('text') or '')
+app.py:444:def create_worker_thread(client, fallback_model):
+app.py:446:    if AUTO_TITLE_LIGHT_MODEL_HINT:
+app.py:447:        model_candidates.append(AUTO_TITLE_LIGHT_MODEL_HINT)
+app.py:460:            result = bridge_rpc_result(client, 'thread/start', params=params)
+app.py:461:            thread_info = result.get('thread') if isinstance(result, dict) else {}
+app.py:462:            thread_id = thread_info.get('id') if isinstance(thread_info, dict) else None
+app.py:463:            if thread_id:
+app.py:465:                    (thread_info.get('model') if isinstance(thread_info, dict) else None)
+app.py:470:                return thread_id, model_used
+app.py:471:            last_error = BridgeError('AUTO_TITLE_WORKER_CREATE_FAILED', 'thread/start returned no thread id')
+app.py:477:    raise BridgeError('AUTO_TITLE_WORKER_CREATE_FAILED', 'Cannot create hidden title worker thread')
+app.py:480:def ensure_auto_title_worker(db, fallback_model):
+app.py:481:    client = get_bridge_client(AUTO_TITLE_WORKER_CLIENT_ID)
+app.py:483:    worker_state = db.get('auto_title_worker') or {}
+app.py:484:    worker_thread_id = worker_state.get('thread_id')
+app.py:492:    if worker_thread_id and usage_count < AUTO_TITLE_WORKER_ROTATE_USES:
+app.py:493:        add_hidden_thread_id(db, worker_thread_id)
+app.py:494:        db['auto_title_worker'] = {
+app.py:495:            'thread_id': worker_thread_id,
+app.py:499:        return client, worker_thread_id, worker_model
+app.py:501:    new_thread_id, model_used = create_worker_thread(client, fallback_model)
+app.py:502:    add_hidden_thread_id(db, new_thread_id)
+app.py:503:    db['auto_title_worker'] = {'thread_id': new_thread_id, 'usage_count': 0, 'model': model_used}
+app.py:505:    return client, new_thread_id, model_used
+app.py:508:def read_thread_turns(client, thread_id):
+app.py:509:    result = bridge_rpc_result(client, 'thread/read', {'threadId': thread_id, 'includeTurns': True})
+app.py:510:    thread = result.get('thread') if isinstance(result, dict) else {}
+app.py:511:    turns = thread.get('turns') if isinstance(thread, dict) else []
+app.py:514:    return thread if isinstance(thread, dict) else {}, turns
+app.py:517:def generate_title_from_worker(client, worker_thread_id, prompt_text):
+app.py:518:    _, before_turns = read_thread_turns(client, worker_thread_id)
+app.py:524:        {'threadId': worker_thread_id, 'input': [{'type': 'text', 'text': prompt_text}]},
+app.py:527:    deadline = time.time() + AUTO_TITLE_GENERATION_TIMEOUT_SECONDS
+app.py:530:        _, latest_turns = read_thread_turns(client, worker_thread_id)
+app.py:539:    raise BridgeError('AUTO_TITLE_TIMEOUT', 'Timed out while generating auto title')
+app.py:542:def build_auto_title_prompt(user_text, assistant_text):
+app.py:544:        "Generate one short chat title.\n"
+app.py:546:        "- Output title only, no explanation.\n"
+app.py:552:        "Title:"
+app.py:573:        if method == 'thread/list' and isinstance(response, dict):
+app.py:578:                hidden_ids = set(db.get('hidden_thread_ids') or [])
+app.py:581:                        thread
+app.py:582:                        for thread in data_list
+app.py:583:                        if not isinstance(thread, dict) or thread.get('id') not in hidden_ids
+app.py:680:    thread_id = data.get('thread_id')
+app.py:686:        db['mapping'][thread_id] = folder_name
+app.py:688:            db['thread_names'].pop(thread_id, None)
+app.py:689:            db['thread_auto_names'].pop(thread_id, None)
+app.py:691:        db['mapping'].pop(thread_id, None)
+app.py:737:@app.route('/api/threads/rename', methods=['POST'])
+app.py:738:def rename_thread_local():
+app.py:742:    thread_id = data.get('thread_id')
+app.py:746:    if thread_id:
+app.py:748:            db['thread_names'][thread_id] = new_name
+app.py:749:            db['thread_auto_names'].pop(thread_id, None)
+app.py:751:            db['thread_names'].pop(thread_id, None)
+app.py:756:@app.route('/api/threads/auto-title', methods=['POST'])
+app.py:757:def auto_title_thread():
+app.py:762:    thread_id = (data.get('thread_id') or '').strip()
+app.py:764:    if not thread_id:
+app.py:765:        return jsonify({'error': 'thread_id is required'}), 400
+app.py:767:    with auto_title_lock:
+app.py:769:        if db['thread_names'].get(thread_id):
+app.py:770:            return jsonify({'status': 'skipped', 'source': 'manual', 'title': db['thread_names'][thread_id]})
+app.py:772:        existing_auto_name = db['thread_auto_names'].get(thread_id)
+app.py:773:        if existing_auto_name:
+app.py:774:            return jsonify({'status': 'ok', 'source': 'cache', 'title': existing_auto_name})
+app.py:776:        heuristic_title = 'New Chat'
+app.py:777:        worker_thread_id = None
+app.py:778:        worker_model = fallback_model or AUTO_TITLE_LIGHT_MODEL_HINT
+app.py:780:            worker_client, worker_thread_id, worker_model = ensure_auto_title_worker(db, fallback_model)
+app.py:782:            _, target_turns = read_thread_turns(worker_client, thread_id)
+app.py:784:            heuristic_title = build_heuristic_title(first_user_text, first_assistant_text)
+app.py:786:            prompt_text = build_auto_title_prompt(first_user_text, first_assistant_text)
+app.py:787:            generated_title = generate_title_from_worker(worker_client, worker_thread_id, prompt_text)
+app.py:788:            final_title = trim_title_text(generated_title) or heuristic_title
+app.py:792:            print(f"[auto-title] fallback to heuristic due to {exc.code}: {exc.message}")
+app.py:793:            final_title = heuristic_title
+app.py:796:            print(f"[auto-title] unexpected fallback to heuristic: {exc}")
+app.py:797:            final_title = heuristic_title
+app.py:801:        if db['thread_names'].get(thread_id):
+app.py:802:            return jsonify({'status': 'skipped', 'source': 'manual', 'title': db['thread_names'][thread_id]})
+app.py:804:        if not final_title:
+app.py:805:            final_title = 'New Chat'
+app.py:807:        db['thread_auto_names'][thread_id] = final_title
+app.py:808:        if worker_thread_id:
+app.py:809:            add_hidden_thread_id(db, worker_thread_id)
+app.py:810:            worker_state = db.get('auto_title_worker') or {}
+app.py:811:            if worker_state.get('thread_id') == worker_thread_id:
+app.py:818:                db['auto_title_worker'] = worker_state
+app.py:821:        return jsonify({'status': 'ok', 'title': final_title, 'source': source, 'model_used': worker_model})
+templates\login.html:6:    <title>System Login</title>
+templates\login.html:31:            <input type="password" id="password" name="password" placeholder="Please enter access password" required autofocus>
+templates\index.html:6:    <title>Codex AI Assistant</title>
+templates\index.html:69:        .section-title { font-size: 13px; font-weight: 500; color: var(--text-sub); padding: 12px 16px 4px; }
+templates\index.html:72:        #thread-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 4px; }
+templates\index.html:73:        #thread-list::-webkit-scrollbar { width: 4px; }
+templates\index.html:74:        #thread-list::-webkit-scrollbar-thumb { background-color: #c4c7c5; border-radius: 4px; }
+templates\index.html:78:        .folder-title-area { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; white-space: nowrap;}
+templates\index.html:84:        .folder-header.drag-over, .section-title.drag-over {
+templates\index.html:89:        .thread-wrapper.dragging {
+templates\index.html:96:        .folder-content .thread-wrapper { padding-left: 36px; position: relative; }
+templates\index.html:97:        .folder-content .thread-wrapper::before { content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: #c4c7c5; opacity: 0.3; }
+templates\index.html:101:        .thread-wrapper { display: flex; align-items: center; justify-content: space-between; border-radius: 20px; transition: background 0.2s; padding-right: 8px; flex-shrink: 0;}
+templates\index.html:102:        .thread-wrapper:hover { background: var(--hover-bg); }
+templates\index.html:103:        .thread-wrapper.active { background: var(--active-bg); color: var(--active-text); font-weight: 500;}
+templates\index.html:104:        .thread-item { flex: 1; padding: 10px 16px; cursor: pointer; font-size: 14px; overflow: hidden; min-width: 0; }
+templates\index.html:105:        .thread-title { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+templates\index.html:106:        .thread-time { display: block; margin-top: 2px; font-size: 12px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+templates\index.html:109:        .thread-wrapper:hover .action-icon-btn, .folder-header:hover .action-icon-btn { opacity: 1; }
+templates\index.html:112:        .sidebar-footer { margin-top: auto; padding-top: 10px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0;}
+templates\index.html:142:        .header-title { font-size: 18px; font-weight: 500; color: var(--text-sub); }
+templates\index.html:144:        #chat-box { flex: 1; padding: 0 20px; overflow-y: auto; scroll-behavior: smooth; padding-bottom: 240px; display: flex; flex-direction: column; align-items: center; }
+templates\index.html:255:        .content { line-height: 1.7; font-size: 16px; color: var(--text-main); overflow-x: auto; }
+templates\index.html:268:        .content pre { margin: 0; padding: 16px; overflow-x: auto; background: transparent; border: none; }
+templates\index.html:272:        #timeline-container { position: absolute; right: 24px; top: 80px; bottom: 200px; width: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 10; overflow-y: auto; scrollbar-width: none;}
+templates\index.html:296:            border: 1px solid rgba(0,0,0,0.02); transition: background 0.3s, box-shadow 0.3s; pointer-events: auto; 
+templates\index.html:417:            overflow: auto;
+templates\index.html:423:            margin: 15% auto;
+templates\index.html:432:            margin: 4vh auto;
+templates\index.html:443:        .preview-modal-title {
+templates\index.html:468:            margin: 6vh auto;
+templates\index.html:493:        .update-modal-title {
+templates\index.html:499:        .update-modal-subtitle {
+templates\index.html:570:            .header-title { font-size: 16px; }
+templates\index.html:573:            .update-modal-title { font-size: 24px; }
+templates\index.html:584:            <button class="new-chat-btn" onclick="createNewThread()">
+templates\index.html:590:        <div id="thread-list"></div>
+templates\index.html:601:            <a href="mailto:support@example.com?subject=Codex%20App%20Bug%20Report" class="footer-action-btn" target="_blank" title="提交 Bug 或改进建议">
+templates\index.html:616:                <div id="sidebar-toggle" title="Toggle Sidebar">
+templates\index.html:619:                <div class="header-title">Codex App Server</div>
+templates\index.html:629:        <div id="scroll-bottom-btn" class="scroll-bottom-btn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display: none; position: absolute; bottom: 120px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;">
+templates\index.html:641:                        <label for="file-input" class="plus-btn-label" title="Upload Attachment">+</label>
+templates\index.html:645:                        <div id="connection-status" class="connection-status" title="Disconnected"></div>
+templates\index.html:651:                        <select id="model-selector" disabled title="Select Model">
+templates\index.html:655:                        <button id="send-btn" onclick="sendMessage()" disabled title="Send">
+templates\index.html:658:                        <button id="stop-btn" onclick="stopGenerating()" title="Stop Generating">
+templates\index.html:683:        let currentThreadId = null;
+templates\index.html:702:        let cachedThreadFolderMapping = {};
+templates\index.html:703:        let cachedThreadNames = {}; 
+templates\index.html:704:        let cachedThreadAutoNames = {};
+templates\index.html:705:        let cachedThreadDraftNames = {};
+templates\index.html:709:        let draggedThreadId = null; 
+templates\index.html:711:        let pendingAutoTitleThreadId = null;
+templates\index.html:712:        let autoTitleInFlightThreads = new Set();
+templates\index.html:713:        let autoTitleAttemptedThreads = new Set();
+templates\index.html:717:            title: '更新说明',
+templates\index.html:718:            subtitle: '本次主要补了附件体验和会话展示。这个弹窗只会在新版本首次打开时出现一次。',
+templates\index.html:740:        const threadListEl = document.getElementById('thread-list');
+templates\index.html:742:        const headerTitleEl = document.querySelector('.header-title');
+templates\index.html:752:        function getCurrentThreadFolderName() {
+templates\index.html:753:            if (!currentThreadId) return '';
+templates\index.html:754:            const folderName = cachedThreadFolderMapping[currentThreadId];
+templates\index.html:759:        function refreshHeaderTitle() {
+templates\index.html:760:            if (!headerTitleEl) return;
+templates\index.html:761:            const folderName = getCurrentThreadFolderName();
+templates\index.html:762:            headerTitleEl.textContent = folderName ? `📁 ${folderName}` : 'Codex App Server';
+templates\index.html:860:            this.style.height = 'auto'; 
+templates\index.html:874:                this.style.overflowY = 'auto';
+templates\index.html:881:            msgInput.style.height = 'auto'; 
+templates\index.html:953:                await loadThreadList();
+templates\index.html:957:                const threadFromUrl = urlParams.get('thread');
+templates\index.html:958:                if (threadFromUrl) {
+templates\index.html:959:                    await openThread(threadFromUrl, true);
+templates\index.html:961:                    await createNewThread(true);
+templates\index.html:975:                connectionStatus.title = "Connected";
+templates\index.html:978:                connectionStatus.title = "Connecting...";
+templates\index.html:980:                connectionStatus.title = "Disconnected";
+templates\index.html:1055:            const title = (fileObj && fileObj.filename) || 'Image preview';
+templates\index.html:1059:                        <div class="preview-modal-title" title="${title}">${title}</div>
+templates\index.html:1062:                    <img class="preview-modal-image" src="${previewUrl}" alt="${title}">
+templates\index.html:1077:            const title = (fileObj && fileObj.filename) || 'PDF preview';
+templates\index.html:1081:                        <div class="preview-modal-title" title="${title}">${title}</div>
+templates\index.html:1084:                    <iframe class="preview-modal-pdf" src="${previewUrl}#toolbar=1&navpanes=0&view=FitH" title="${title}"></iframe>
+templates\index.html:1121:                            <h2 class="update-modal-title">${UPDATE_ANNOUNCEMENT.title}</h2>
+templates\index.html:1122:                            <p class="update-modal-subtitle">${UPDATE_ANNOUNCEMENT.subtitle}</p>
+templates\index.html:1160:                    card.title = fileObj.filename;
+templates\index.html:1378:                    await loadThreadList();
+templates\index.html:1386:        async function loadThreadList() {
+templates\index.html:1393:                cachedThreadFolderMapping = mapping;
+templates\index.html:1394:                cachedThreadNames = fData.thread_names || {};
+templates\index.html:1395:                cachedThreadAutoNames = fData.thread_auto_names || {};
+templates\index.html:1396:                Object.keys(cachedThreadDraftNames).forEach(threadId => {
+templates\index.html:1397:                    if (cachedThreadNames[threadId] || cachedThreadAutoNames[threadId]) {
+templates\index.html:1398:                        delete cachedThreadDraftNames[threadId];
+templates\index.html:1402:                const res = await rpcCall("thread/list", { limit: 1000 });
+templates\index.html:1403:                threadListEl.innerHTML = '';
+templates\index.html:1408:                            getThreadTimestampValue(t.updatedAt) ||
+templates\index.html:1409:                            getThreadTimestampValue(t.updated_at) ||
+templates\index.html:1410:                            getThreadTimestampValue(t.createdAt) ||
+templates\index.html:1411:                            getThreadTimestampValue(t.created_at);
+templates\index.html:1413:                    const sortedThreads = res.data.sort((a, b) => {
+templates\index.html:1416:                    const visibleThreadIds = new Set(sortedThreads.map(t => t.id));
+templates\index.html:1417:                    Object.keys(cachedThreadDraftNames).forE…5600 tokens truncated…  #timeline-container { position: absolute; right: 24px; top: 80px; bottom: 200px; width: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 10; overflow-y: auto; scrollbar-width: none;}
+templates\index copy 2.html:296:            border: 1px solid rgba(0,0,0,0.02); transition: background 0.3s, box-shadow 0.3s; pointer-events: auto; 
+templates\index copy 2.html:417:            overflow: auto;
+templates\index copy 2.html:423:            margin: 15% auto;
+templates\index copy 2.html:432:            margin: 4vh auto;
+templates\index copy 2.html:443:        .preview-modal-title {
+templates\index copy 2.html:468:            margin: 6vh auto;
+templates\index copy 2.html:493:        .update-modal-title {
+templates\index copy 2.html:499:        .update-modal-subtitle {
+templates\index copy 2.html:570:            .header-title { font-size: 16px; }
+templates\index copy 2.html:573:            .update-modal-title { font-size: 24px; }
+templates\index copy 2.html:584:            <button class="new-chat-btn" onclick="createNewThread()">
+templates\index copy 2.html:590:        <div id="thread-list"></div>
+templates\index copy 2.html:601:            <a href="mailto:support@example.com?subject=Codex%20App%20Bug%20Report" class="footer-action-btn" target="_blank" title="提交 Bug 或改进建议">
+templates\index copy 2.html:616:                <div id="sidebar-toggle" title="Toggle Sidebar">
+templates\index copy 2.html:619:                <div class="header-title">Codex App Server</div>
+templates\index copy 2.html:629:        <div id="scroll-bottom-btn" class="scroll-bottom-btn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display: none; position: absolute; bottom: 120px; right: 24px; width: 40px; height: 40px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;">
+templates\index copy 2.html:641:                        <label for="file-input" class="plus-btn-label" title="Upload Attachment">+</label>
+templates\index copy 2.html:645:                        <div id="connection-status" class="connection-status" title="Disconnected"></div>
+templates\index copy 2.html:651:                        <select id="model-selector" disabled title="Select Model">
+templates\index copy 2.html:655:                        <button id="send-btn" onclick="sendMessage()" disabled title="Send">
+templates\index copy 2.html:658:                        <button id="stop-btn" onclick="stopGenerating()" title="Stop Generating">
+templates\index copy 2.html:681:        let currentThreadId = null;
+templates\index copy 2.html:687:        let cachedThreadNames = {}; 
+templates\index copy 2.html:691:        let draggedThreadId = null; 
+templates\index copy 2.html:696:            title: '更新说明',
+templates\index copy 2.html:697:            subtitle: '本次主要补了附件体验和会话展示。这个弹窗只会在新版本首次打开时出现一次。',
+templates\index copy 2.html:718:        const threadListEl = document.getElementById('thread-list');
+templates\index copy 2.html:824:            this.style.height = 'auto'; 
+templates\index copy 2.html:838:                this.style.overflowY = 'auto';
+templates\index copy 2.html:845:            msgInput.style.height = 'auto'; 
+templates\index copy 2.html:864:                    await loadThreadList();
+templates\index copy 2.html:868:                    const threadFromUrl = urlParams.get('thread');
+templates\index copy 2.html:869:                    if (threadFromUrl) {
+templates\index copy 2.html:870:                        await openThread(threadFromUrl, true);
+templates\index copy 2.html:872:                        await createNewThread(true);
+templates\index copy 2.html:914:                connectionStatus.title = "Connected";
+templates\index copy 2.html:917:                connectionStatus.title = "Connecting...";
+templates\index copy 2.html:919:                connectionStatus.title = "Disconnected";
+templates\index copy 2.html:994:            const title = (fileObj && fileObj.filename) || 'Image preview';
+templates\index copy 2.html:998:                        <div class="preview-modal-title" title="${title}">${title}</div>
+templates\index copy 2.html:1001:                    <img class="preview-modal-image" src="${previewUrl}" alt="${title}">
+templates\index copy 2.html:1016:            const title = (fileObj && fileObj.filename) || 'PDF preview';
+templates\index copy 2.html:1020:                        <div class="preview-modal-title" title="${title}">${title}</div>
+templates\index copy 2.html:1023:                    <iframe class="preview-modal-pdf" src="${previewUrl}#toolbar=1&navpanes=0&view=FitH" title="${title}"></iframe>
+templates\index copy 2.html:1060:                            <h2 class="update-modal-title">${UPDATE_ANNOUNCEMENT.title}</h2>
+templates\index copy 2.html:1061:                            <p class="update-modal-subtitle">${UPDATE_ANNOUNCEMENT.subtitle}</p>
+templates\index copy 2.html:1099:                    card.title = fileObj.filename;
+templates\index copy 2.html:1288:                    await loadThreadList();
+templates\index copy 2.html:1296:        async function loadThreadList() {
+templates\index copy 2.html:1303:                cachedThreadNames = fData.thread_names || {};
+templates\index copy 2.html:1305:                const res = await rpcCall("thread/list", { limit: 50 });
+templates\index copy 2.html:1306:                threadListEl.innerHTML = '';
+templates\index copy 2.html:1311:                            getThreadTimestampValue(t.updatedAt) ||
+templates\index copy 2.html:1312:                            getThreadTimestampValue(t.updated_at) ||
+templates\index copy 2.html:1313:                            getThreadTimestampValue(t.createdAt) ||
+templates\index copy 2.html:1314:                            getThreadTimestampValue(t.created_at);
+templates\index copy 2.html:1316:                    const sortedThreads = res.data.sort((a, b) => {
+templates\index copy 2.html:1323:                    sortedThreads.forEach(thread => {
+templates\index copy 2.html:1324:                        const folderName = mapping[thread.id] || "root";
+templates\index copy 2.html:1327:                        groups[folderName].push(thread);
+templates\index copy 2.html:1331:                        const folderTitle = document.createElement('div');
+templates\index copy 2.html:1332:                        folderTitle.className = 'section-title';
+templates\index copy 2.html:1333:                        folderTitle.textContent = 'Folders';
+templates\index copy 2.html:1334:                        threadListEl.appendChild(folderTitle);
+templates\index copy 2.html:1336:                        const activeFolderName = mapping[currentThreadId];
+templates\index copy 2.html:1344:                        threadListEl.appendChild(divider);
+templates\index copy 2.html:1348:                        const chatTitle = document.createElement('div');
+templates\index copy 2.html:1349:                        chatTitle.className = 'section-title';
+templates\index copy 2.html:1350:                        chatTitle.textContent = 'Chats';
+templates\index copy 2.html:1352:                        chatTitle.ondragover = (e) => { e.preventDefault(); chatTitle.classList.add('drag-over'); };
+templates\index copy 2.html:1353:                        chatTitle.ondragleave = () => { chatTitle.classList.remove('drag-over'); };
+templates\index copy 2.html:1354:                        chatTitle.ondrop = async (e) => {
+templates\index copy 2.html:1356:                            chatTitle.classList.remove('drag-over');
+templates\index copy 2.html:1357:                            if (draggedThreadId) {
+templates\index copy 2.html:1360:                                    body: JSON.stringify({ thread_id: draggedThreadId, folder_name: '' }) 
+templates\index copy 2.html:1362:                                loadThreadList();
+templates\index copy 2.html:1366:                        threadListEl.appendChild(chatTitle);
+templates\index copy 2.html:1368:                        if (groups["root"]) groups["root"].forEach(thread => renderThreadItem(thread, threadListEl));
+templates\index copy 2.html:1372:                if(currentThreadId) {
+templates\index copy 2.html:1373:                    updateSidebarActive(currentThreadId);
+templates\index copy 2.html:1378:        function renderFolderUI(name, threads, isExpanded = false) {
+templates\index copy 2.html:1389:                if (draggedThreadId) {
+templates\index copy 2.html:1392:                        body: JSON.stringify({ thread_id: draggedThreadId, folder_name: name }) 
+templates\index copy 2.html:1394:                    loadThreadList();
+templates\index copy 2.html:1398:            const count = threads ? threads.length : 0;
+templates\index copy 2.html:1405:            const titleArea = document.createElement('div');
+templates\index copy 2.html:1406:            titleArea.className = 'folder-title-area';
+templates\index copy 2.html:1407:            titleArea.innerHTML = `${arrowHtml} <span class="folder-name-span">📁 ${name}</span> <span class="folder-count">(${count})</span>`;
+templates\index copy 2.html:1414:            header.appendChild(titleArea);
+templates\index copy 2.html:1420:            titleArea.onclick = () => {
+templates\index copy 2.html:1423:                const icon = titleArea.querySelector('.folder-icon');
+templates\index copy 2.html:1427:            if (threads && threads.length > 0) {
+templates\index copy 2.html:1428:                threads.forEach(t => renderThreadItem(t, content));
+templates\index copy 2.html:1433:            threadListEl.appendChild(wrapper);
+templates\index copy 2.html:1436:        function getThreadTimestampValue(source) {
+templates\index copy 2.html:1463:        function formatThreadTime(thread) {
+templates\index copy 2.html:1465:                getThreadTimestampValue(thread.updatedAt) ||
+templates\index copy 2.html:1466:                getThreadTimestampValue(thread.updated_at) ||
+templates\index copy 2.html:1467:                getThreadTimestampValue(thread.createdAt) ||
+templates\index copy 2.html:1468:                getThreadTimestampValue(thread.created_at) ||
+templates\index copy 2.html:1469:                thread._ts;
+templates\index copy 2.html:1492:        function sanitizeThreadTitle(rawText) {
+templates\index copy 2.html:1511:        function renderThreadItem(thread, container) {
+templates\index copy 2.html:1513:            wrapper.className = 'thread-wrapper';
+templates\index copy 2.html:1514:            wrapper.dataset.id = thread.id;
+templates\index copy 2.html:1518:                draggedThreadId = thread.id;
+templates\index copy 2.html:1524:                draggedThreadId = null;
+templates\index copy 2.html:1529:            item.className = 'thread-item';
+templates\index copy 2.html:1531:            let displayName = cachedThreadNames[thread.id] || sanitizeThreadTitle(thread.name) || sanitizeThreadTitle(thread.preview);
+templates\index copy 2.html:1534:                    getThreadTimestampValue(thread.createdAt) ||
+templates\index copy 2.html:1535:                    getThreadTimestampValue(thread.created_at);
+templates\index copy 2.html:1545:            const updatedLabel = formatThreadTime(thread);
+templates\index copy 2.html:1547:                <span class="thread-title">${displayName}</span>
+templates\index copy 2.html:1548:                <span class="thread-time">${updatedLabel}</span>
+templates\index copy 2.html:1550:            item.onclick = () => { openThread(thread.id); };
+templates\index copy 2.html:1555:            actionBtn.onclick = (e) => { openContextMenu(e, 'thread', thread.id); };
+templates\index copy 2.html:1567:            if (type === 'thread') { renderThreadMainMenu(); } 
+templates\index copy 2.html:1580:                <div class="context-menu-item" onclick="createThreadInFolder()">💬 New Chat Here</div>
+templates\index copy 2.html:1587:        async function createThreadInFolder() {
+templates\index copy 2.html:1592:                const res = await rpcCall("thread/start", { model: modelSelector.value }); 
+templates\index copy 2.html:1593:                currentThreadId = res.thread.id;
+templates\index copy 2.html:1594:                window.history.pushState({threadId: currentThreadId}, '', `?thread=${currentThreadId}`);
+templates\index copy 2.html:1597:                    body: JSON.stringify({ thread_id: currentThreadId, folder_name: activeContextTargetId }) 
+templates\index copy 2.html:1600:                await loadThreadList(); 
+templates\index copy 2.html:1636:                await loadThreadList();
+templates\index copy 2.html:1646:                    loadThreadList(); 
+templates\index copy 2.html:1656:            if(confirm(`Delete folder "${activeContextTargetId}"?\nThreads inside will be moved to root.`)) {
+templates\index copy 2.html:1661:                loadThreadList();
+templates\index copy 2.html:1665:        function renderThreadMainMenu() {
+templates\index copy 2.html:1667:                <div class="context-menu-item" onclick="triggerThreadRenameUI()">✏️ Rename</div>
+templates\index copy 2.html:1668:                <div class="context-menu-item" onclick="renderThreadMoveMenu()">📁 Move to... <span style="color:#8e8ea0">▶</span></div>
+templates\index copy 2.html:1670:                <div class="context-menu-item danger" onclick="deleteThread()">🗑️ Delete Thread</div>
+templates\index copy 2.html:1674:        function renderThreadMoveMenu() {
+templates\index copy 2.html:1675:            let html = `<div class="context-menu-item" onclick="renderThreadMainMenu()" style="color:#8e8ea0">◀ Back</div><div class="context-menu-divider"></div>`;
+templates\index copy 2.html:1676:            html += `<div class="context-menu-item" onclick="submitThreadMove('')">🏠 Move to Root</div>`;
+templates\index copy 2.html:1677:            cachedFolders.forEach(f => { html += `<div class="context-menu-item" onclick="submitThreadMove('${f}')">📂 ${f}</div>`; });
+templates\index copy 2.html:1681:        async function submitThreadMove(folderName) {
+templates\index copy 2.html:1685:                body: JSON.stringify({ thread_id: activeContextTargetId, folder_name: folderName }) 
+templates\index copy 2.html:1687:            loadThreadList();
+templates\index copy 2.html:1690:        async function deleteThread() {
+templates\index copy 2.html:1692:            if(confirm("Permanently delete this thread?")) {
+templates\index copy 2.html:1695:                    body: JSON.stringify({ thread_id: activeContextTargetId, folder_name: '__deleted__' }) 
+templates\index copy 2.html:1697:                try { await rpcCall("thread/delete", { threadId: activeContextTargetId }); } catch(e) { }
+templates\index copy 2.html:1698:                if (currentThreadId === activeContextTargetId) { 
+templates\index copy 2.html:1699:                    chatBox.innerHTML = ''; currentThreadId = null; timelineContainer.innerHTML = '';
+templates\index copy 2.html:1702:                loadThreadList();
+templates\index copy 2.html:1706:        function triggerThreadRenameUI() {
+templates\index copy 2.html:1708:            const wrapper = document.querySelector(`.thread-wrapper[data-id="${activeContextTargetId}"]`);
+templates\index copy 2.html:1709:            const itemDiv = wrapper.querySelector('.thread-item');
+templates\index copy 2.html:1710:            const titleEl = itemDiv.querySelector('.thread-title');
+templates\index copy 2.html:1711:            const currentName = (titleEl ? titleEl.textContent : itemDiv.textContent).replace(/^New Chat \(.+\)$/, 'New Chat');
+templates\index copy 2.html:1732:                        await fetch('/api/threads/rename', { 
+templates\index copy 2.html:1734:                            body: JSON.stringify({ thread_id: activeContextTargetId, new_name: newName }) 
+templates\index copy 2.html:1736:                        await rpcCall("thread/update", { threadId: activeContextTargetId, id: activeContextTargetId, name: newName, title: newName });
+templates\index copy 2.html:1739:                await loadThreadList();
+templates\index copy 2.html:1749:                    loadThreadList(); 
+templates\index copy 2.html:1760:            dot.title = tooltipText || `Turn ${turnId}`;
+templates\index copy 2.html:1775:        async function createNewThread(skipHistory = false) {
+templates\index copy 2.html:1782:                const res = await rpcCall("thread/start", { model: modelSelector.value });
+templates\index copy 2.html:1783:                currentThreadId = res.thread.id;
+templates\index copy 2.html:1786:                    window.history.pushState({threadId: currentThreadId}, '', `?thread=${currentThreadId}`);
+templates\index copy 2.html:1789:                await loadThreadList();
+templates\index copy 2.html:1793:        async function openThread(threadId, skipHistory = false) {
+templates\index copy 2.html:1794:            if (currentThreadId === threadId) return;
+templates\index copy 2.html:1803:                const res = await rpcCall("thread/read", { threadId: threadId, includeTurns: true });
+templates\index copy 2.html:1806:                if (res.thread && res.thread.model) {
+templates\index copy 2.html:1807:                    let exists = Array.from(modelSelector.options).some(opt => opt.value === res.thread.model);
+templates\index copy 2.html:1810:                        opt.value = res.thread.model; 
+templates\index copy 2.html:1811:                        opt.text = res.thread.model;
+templates\index copy 2.html:1814:                    modelSelector.value = res.thread.model;
+templates\index copy 2.html:1818:                if (res.thread.turns) {
+templates\index copy 2.html:1819:                    res.thread.turns.forEach(turn => {
+templates\index copy 2.html:1843:                await rpcCall("thread/resume", { threadId: threadId });
+templates\index copy 2.html:1844:                currentThreadId = threadId; 
+templates\index copy 2.html:1846:                    window.history.pushState({threadId: currentThreadId}, '', `?thread=${currentThreadId}`);
+templates\index copy 2.html:1848:                updateSidebarActive(currentThreadId); 
+templates\index copy 2.html:1885:            if (isGenerating && currentThreadId) {
+templates\index copy 2.html:1886:                ws.send(JSON.stringify({ method: "turn/cancel", id: reqId++, params: { threadId: currentThreadId } }));
+templates\index copy 2.html:1934:            ws.send(JSON.stringify({ method: "turn/start", id: reqId++, params: { threadId: currentThreadId, input: inputItems } }));
+templates\index copy 2.html:1935:            setTimeout(() => { loadThreadList(); }, 500);
+templates\index copy 2.html:2204:            document.querySelectorAll('.thread-wrapper').forEach(el => { 
+templates\index copy 2.html:2235:                    <div class="attachment-info" title="${fileObj.filename}">
+templates\index copy 2.html:2239:                    <span class="remove-file" onclick="removeAttachment(${index})" title="Remove">✕</span>
+templates\index copy 2.html:2405:            if (!currentThreadId) return;
+templates\index copy 2.html:2459:                params: { threadId: currentThreadId, input: inputItems } 
+templates\index copy 2.html:2462:            setTimeout(() => { loadThreadList(); }, 500);
+templates\index copy 2.html:2483:            const threadId = urlParams.get('thread');
+templates\index copy 2.html:2484:            if (threadId) {
+templates\index copy 2.html:2485:                openThread(threadId, true);
+templates\index copy 2.html:2487:                createNewThread(true);
+rg: tests: The system cannot find the file specified. (os error 2)
+
+[2m2026-04-25T11:45:15.805423Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 1.5 seconds
+Output:
+[31;1mResourceUnavailable: [0m
+[31;1m[36;1mLine |[0m
+[31;1m[36;1m[36;1m   2 | [0m [36;1mpython -c "import playwright; print('playwright available')"[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mProgram 'python.exe' failed to run: An error occurred trying to start process 'C:\Users\Felix\AppData\Local\Microsoft\WindowsApps\python.exe' with working directory 'C:\Users\Felix\Desktop\Coding\codex_app_server'. The file cannot be accessed by the system.At line:2 char:1[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ python -c "import playwright; print('playwright available')"[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.[0m
+
+[2m2026-04-25T11:45:15.806026Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 1.3 seconds
+Output:
+[31;1mResourceUnavailable: [0m
+[31;1m[36;1mLine |[0m
+[31;1m[36;1m[36;1m   2 | [0m [36;1mpython -c "import requests; print(requests.get('http://127.0.0.1:4500[0m …[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mProgram 'python.exe' failed to run: An error occurred trying to start process 'C:\Users\Felix\AppData\Local\Microsoft\WindowsApps\python.exe' with working directory 'C:\Users\Felix\Desktop\Coding\codex_app_server'. The file cannot be accessed by the system.At line:2 char:1[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ python -c "import requests; print(requests.get('http://127.0.0.1:4500 …[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.[0m
+
+[2m2026-04-25T11:45:15.806412Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 1.5 seconds
+Output:
+[31;1mResourceUnavailable: [0m
+[31;1m[36;1mLine |[0m
+[31;1m[36;1m[36;1m   2 | [0m [36;1mpython -c "import requests; print(requests.get('http://127.0.0.1:8080[0m …[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mProgram 'python.exe' failed to run: An error occurred trying to start process 'C:\Users\Felix\AppData\Local\Microsoft\WindowsApps\python.exe' with working directory 'C:\Users\Felix\Desktop\Coding\codex_app_server'. The file cannot be accessed by the system.At line:2 char:1[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ python -c "import requests; print(requests.get('http://127.0.0.1:8080 …[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1m+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.[0m
+
+[2m2026-04-25T11:45:25.576490Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.6 seconds
+Output:
+[31;1mGet-Command: [0m
+[31;1m[36;1mLine |[0m
+[31;1m[36;1m[36;1m   2 | [0m [36;1mGet-Command py[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m ~~~~~~~~~~~~~~[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mThe term 'py' is not recognized as a name of a cmdlet, function, script file, or executable program.[0m
+[31;1m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m[31;1mCheck the spelling of the name, or if a path was included, verify that the path is correct and try again.[0m
+
+[2m2026-04-25T11:45:40.091529Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.5 seconds
+Output:
+error: failed to open file `C:\Users\Felix\AppData\Local\uv\cache\sdists-v9\.git`: Access is denied. (os error 5)
+
+[2m2026-04-25T11:45:40.112806Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.5 seconds
+Output:
+error: failed to open file `C:\Users\Felix\AppData\Local\uv\cache\sdists-v9\.git`: Access is denied. (os error 5)
+
+[2m2026-04-25T11:45:40.176228Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.5 seconds
+Output:
+error: failed to open file `C:\Users\Felix\AppData\Local\uv\cache\sdists-v9\.git`: Access is denied. (os error 5)
+
+[2m2026-04-25T11:45:40.192368Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.5 seconds
+Output:
+error: failed to open file `C:\Users\Felix\AppData\Local\uv\cache\sdists-v9\.git`: Access is denied. (os error 5)
+
+[2m2026-04-25T11:45:55.480601Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.6 seconds
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import requests; print(requests.get('http://127.0.0.1:8080/login', timeout=5).status_code)
+    ^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'requests'
+
+[2m2026-04-25T11:45:55.496688Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.6 seconds
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import requests; print(requests.get('http://127.0.0.1:4500/readyz', timeout=5).status_code)
+    ^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'requests'
+
+[2m2026-04-25T11:45:55.508165Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 0.6 seconds
+Output:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import playwright; print('playwright available')
+    ^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'playwright'
+
+[2m2026-04-25T11:46:06.121430Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 1 seconds
+Output:
+C:\Users\Felix\Desktop\Coding\codex_app_server
+`-- (empty)
+
+
+[2m2026-04-25T11:46:06.121727Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 1 seconds
+Output:
+C:\Users\Felix\Desktop\Coding\codex_app_server
+`-- (empty)
+
+
+[2m2026-04-25T11:46:19.831629Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:46:19.833833Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))
+[2m2026-04-25T11:46:19.834098Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when UnexpectedContentType(Some("missing-content-type; body: "))

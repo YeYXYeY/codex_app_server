@@ -1,0 +1,2 @@
+WARNING: proceeding, even though we could not update PATH: Access is denied. (os error 5)
+Error: error loading default config after config error: Access is denied. (os error 5)

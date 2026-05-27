@@ -10,4 +10,5 @@ dependencies = [
     "waitress>=3.0.2",
     "pypdf>=6.8.0",
     "flask-cors>=6.0.2",
+    "websocket-client>=1.8.0",
 ]
